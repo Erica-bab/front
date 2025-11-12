@@ -7,6 +7,7 @@ import CafeScreen from './screens/CafeScreen';
 import BarScreen from './screens/BarScreen';
 import SearchScreen from './screens/SearchScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import testScreen from './screens/testScreen';
 import './global.css';
 
 const Tab = createBottomTabNavigator();
@@ -63,6 +64,13 @@ export default function App() {
               tabBarLabel: '마이'
             }}
           />
+          <Tab.Screen
+            name="test"
+            component={testScreen}
+            options={{
+              title: 'test',
+              tabBarLabel: 'test'
+            }}/>
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaView>
