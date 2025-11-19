@@ -3,17 +3,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import CafeteriaScreen from './screens/CafeteriaScreen';
-import RestuarantScreen from './screens/Restaurant';
-import CafeScreen from './screens/CafeScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import CommentScreen from './screens/CommentScreen';
+import CafeteriaScreen from '@/screens/CafeteriaScreen';
+import RestuarantScreen from '@/screens/Restaurant';
+import CafeScreen from '@/screens/CafeScreen';
+import ProfileScreen from '@/screens/ProfileScreen';
+import CommentScreen from '@/screens/CommentScreen';
 
-import MyIcon from './assets/icon/tabicon/my.svg';
-import CafeIcon from './assets/icon/tabicon/cafe.svg';
-import BobIcon from './assets/icon/tabicon/bab.svg';
-import SchoolIcon from './assets/icon/tabicon/school.svg';
-import './global.css';
+import MyIcon from '@/assets/icon/tabicon/my.svg';
+import CafeIcon from '@/assets/icon/tabicon/cafe.svg';
+import BobIcon from '@/assets/icon/tabicon/bab.svg';
+import SchoolIcon from '@/assets/icon/tabicon/school.svg';
+import '@/global.css';
 
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();

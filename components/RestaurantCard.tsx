@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
-import Card from './ui/Card';
-import RestaurantStatusTag from './ui/RestaurantStatusTag';
+import Card from '@/components/ui/Card';
+import RestaurantStatusTag from '@/components/ui/RestaurantStatusTag';
 
 interface RestaurantCardProps {
   name: string;

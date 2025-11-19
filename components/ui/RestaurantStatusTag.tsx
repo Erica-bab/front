@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
-import Tag from "./Tag";
-import StarIcon from "../../assets/icon/star.svg";
+import Tag from "@/components/ui/Tag";
+import StarIcon from "@/assets/icon/star.svg";
 
 type BusinessStatus = '영업중' | '영업종료' | '브레이크타임';
 
