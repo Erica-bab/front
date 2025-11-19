@@ -11,7 +11,7 @@ interface RestaurantCardProps {
 
 export default function RestaurantCard({ name, category, status, rating }: RestaurantCardProps) {
   return (
-    <Card variant="default">
+    <Card>
       <View className="flex-row items-center">
         <Text className="text-lg text-blue-500">{name}</Text>
         <Text className="ml-1">{category}</Text>

@@ -28,6 +28,10 @@ export default function App() {
               headerShown: false,
               tabBarActiveTintColor: '#2563EB',
               tabBarInactiveTintColor: '#000000',
+              tabBarStyle: {
+                paddingTop: 8,
+                height: 80,
+              },
             }}
           >
           <Tab.Screen

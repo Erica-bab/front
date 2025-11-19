@@ -5,6 +5,7 @@ interface CardProps{
     children: ReactNode;
     variant?: 'default' | 'banner' | 'danger' | 'success';
     style?: ViewStyle;
+    className?: string;
 }
 
 const variantStyles = {
@@ -14,9 +15,9 @@ const variantStyles = {
     success: 'bg-green-500',
 };
 
-export default function Card({children, variant = 'default', style}:CardProps){
+export default function Card({children, variant = 'default', style, className}:CardProps){
     return(
-        <View className={`rounded-2xl p-4 mx-2 my-2 self-stretch ${variantStyles[variant]}`} style={{ gap: 8, ...style }}>
+        <View className={`rounded-2xl p-4 mx-2 my-2 self-stretch gap-2 ${variantStyles[variant]} ${className || ''}`} style={style}>
             {children}
         </View>
     )
