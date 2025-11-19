@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import TextIconButton from '../components/ui/TextIconButton';
-import ClockIcon from '../assets/icon/clock.svg';
-import CafeteriaList from '../components/cafeteria/CafeteriaList';
-import RightanlgeICon from '../assets/icon/right_angle.svg';
+import { View,ScrollView, Text, TouchableOpacity } from 'react-native';
+import TextIconButton from '@/components/ui/TextIconButton';
+import ClockIcon from '@/assets/icon/clock.svg';
+import CafeteriaList from '@/components/cafeteria/CafeteriaList';
+import RightanlgeICon from '@/assets/icon/right_angle.svg';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type CafeteriaType = 'student' | 'staff' | 'startup' | 'dorm';
 
@@ -11,9 +12,11 @@ export default function SchoolRestaurantScreen() {
   const [selectedType, setSelectedType] = useState<CafeteriaType>('student');
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1 bg-white">
       <CafeteriaHeader selectedType={selectedType} onChangeType={setSelectedType} />
-      <CafeteriaList />
+      <ScrollView>
+        <CafeteriaList />
+      </ScrollView>
     </View>
   );
 }
@@ -21,7 +24,7 @@ export default function SchoolRestaurantScreen() {
 
 function CafeteriaHeader({ selectedType, onChangeType, }: { selectedType: CafeteriaType; onChangeType: (type: CafeteriaType) => void; }) {
   return (
-    <View className="w-full flex bg-white px-10">
+    <SafeAreaView className="w-full flex bg-white px-10">
       <View className="flex-row justify-end -mr-4 mt-1">
         <TouchableOpacity onPress={() => console.log("왼쪽 클릭")}>
           <ClockIcon width={24} height={24} color={"#6B6B6B"}/>
@@ -78,6 +81,6 @@ function CafeteriaHeader({ selectedType, onChangeType, }: { selectedType: Cafete
           onBoxClass="border-b-2 border-[#2563EB] -pb-2"
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
