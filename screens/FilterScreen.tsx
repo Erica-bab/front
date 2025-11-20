@@ -10,7 +10,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 
 const DAYS = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
-const FOOD_TYPES = ['전체','한식','양식','중식','일식','양식','아시안','분식','패스트푸드']
+const FOOD_TYPES = ['전체','한식','중식','일식','양식','아시안','분식','패스트푸드']
 const HOUR = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
 const MIN = ['00','30'];
 const AFFILIATE =['공학대학','소프트웨어융합대학','약학대학','첨단융합대학','글로벌문화통상대학','커뮤니케이션&컬쳐대학','경상대학','디자인대학','예체능대학','LIONS칼리지'];
@@ -22,7 +22,9 @@ export default function FilterScreen() {
   const [selectedHour, setSelectedHour] = useState<string>();
   const [selectedMin, setSelectedMin] = useState<string>();
   const [activeDropdown, setActiveDropdown] = useState<'day' | 'hour' | 'min' | null>(null);
+  const [selectedFoodTypes, setSelectedFoodTypes] = useState<string[]>([]);
   const [selectedAffiliates, setSelectedAffiliates] = useState<string[]>([]);
+  const [selectedRestaurantTypes, setSelectedRestaurantTypes] = useState<string[]>([]);
 
   return (
     <View className="flex-1">
@@ -83,13 +85,24 @@ export default function FilterScreen() {
                 <OptionBtn
                   key={idx}
                   text={name}
-                  isSelected={selectedAffiliates.includes(name)}
+                  isSelected={selectedFoodTypes.includes(name)}
                   onPress={() => {
-                    setSelectedAffiliates(prev =>
-                      prev.includes(name)
-                        ? prev.filter(item => item !== name)
-                        : [...prev, name]
-                    );
+                    if (name === '전체') {
+                      // 전체를 누르면 모든 항목 선택/해제
+                      if (selectedFoodTypes.length === FOOD_TYPES.length) {
+                        setSelectedFoodTypes([]);
+                      } else {
+                        setSelectedFoodTypes(FOOD_TYPES);
+                      }
+                    } else {
+                      setSelectedFoodTypes(prev => {
+                        const newSelection = prev.includes(name)
+                          ? prev.filter(item => item !== name)
+                          : [...prev, name];
+                        // '전체'를 제거
+                        return newSelection.filter(item => item !== '전체');
+                      });
+                    }
                   }}
                 />
               ))}
@@ -119,9 +132,9 @@ export default function FilterScreen() {
                 <OptionBtn
                   key={idx}
                   text={name}
-                  isSelected={selectedAffiliates.includes(name)}
+                  isSelected={selectedRestaurantTypes.includes(name)}
                   onPress={() => {
-                    setSelectedAffiliates(prev =>
+                    setSelectedRestaurantTypes(prev =>
                       prev.includes(name)
                         ? prev.filter(item => item !== name)
                         : [...prev, name]
