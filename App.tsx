@@ -10,6 +10,7 @@ import CafeScreen from './screens/CafeScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import CommentScreen from './screens/CommentScreen';
 import FilterScreen from './screens/FilterScreen';
+import RestaurantDetailScreen from './screens/RestaurantDetailScreen';
 
 import MyIcon from './assets/icon/tabicon/my.svg';
 import CafeIcon from './assets/icon/tabicon/cafe.svg';
@@ -102,6 +103,13 @@ export default function App() {
                 headerShown: false,
                 presentation: 'transparentModal',
                 animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="RestaurantDetail"
+              component={RestaurantDetailScreen}
+              options={{
+                headerShown: false,
               }}
             />
           </Stack.Navigator>

@@ -2,9 +2,7 @@ import { View, Text, TextInput, Pressable, Animated } from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import DropdownIcon from '@/assets/icon/dropdown.svg';
-import FilterIcon from '@/assets/icon/filter.svg';
-import SearchIcon from '@/assets/icon/search.svg';
+import Icon from '@/components/Icon';
 
 interface SearchScreenProps {
   children?: React.ReactNode;
@@ -18,12 +16,15 @@ export default function SearchScreen({ children }: SearchScreenProps) {
   return (
     <Animated.ScrollView
       stickyHeaderIndices={[1]}
-      className="flex-1 bg-white"
+      className="flex-1 bg-[rgba(248, 250, 252, 1)]"
       onScroll={Animated.event(
         [{ nativeEvent: { contentOffset: { y: scrollY } } }],
         { useNativeDriver: false }
       )}
       scrollEventThrottle={16}
+      bounces={true}
+      bouncesZoom={false}
+      alwaysBounceVertical={false}
     >
       <Animated.View
         className='w-full px-5 py-1 bg-white'
@@ -45,10 +46,13 @@ export default function SearchScreen({ children }: SearchScreenProps) {
             <Text className="text-md font-semibold text-neutral-900">
               경기 안산시 상록구 한양
             </Text>
-            <DropdownIcon width={10} height={13} />
+            <Icon name="dropdown" width={10} height={13} />
           </View>
-          <Pressable onPress={() => navigation.navigate('Filter')}>
-            <FilterIcon/>
+          <Pressable
+            onPress={() => navigation.navigate('Filter')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Icon name="filter" />
           </Pressable>
         </View>
       </Animated.View>
@@ -61,7 +65,7 @@ export default function SearchScreen({ children }: SearchScreenProps) {
             placeholderTextColor="#9CA3AF"
           />
           <Pressable>
-            <SearchIcon width={35}/>
+            <Icon name="search" width={35}/>
           </Pressable>
         </View>
       </View>

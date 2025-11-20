@@ -10,7 +10,7 @@ export default function RestuarantScreen() {
     const { data, isLoading, error } = useRestaurantList();
 
     return (
-        <SafeAreaView edges={['top']} className="flex-1 bg-[#F8FAFC]">
+        <SafeAreaView edges={['top']} className="flex-1 bg-white">
             <SearchBar>
                 <Card variant="banner">
                     <View>
