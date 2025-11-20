@@ -6,7 +6,10 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "generate:icons": "node scripts/generate-icons.js",
+    "watch:icons": "chokidar \"assets/icon/*.svg\" -c \"npm run generate:icons\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
@@ -36,7 +39,11 @@
     "@commitlint/config-conventional": "^20.0.0",
     "@react-native/eslint-config": "^0.82.1",
     "@types/react": "~19.1.10",
+<<<<<<< Updated upstream
     "babel-plugin-module-resolver": "^5.0.2",
+=======
+    "chokidar-cli": "^3.0.0",
+>>>>>>> Stashed changes
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
@@ -44,6 +51,12 @@
     "prettier": "^3.6.2",
     "react-native-svg-transformer": "^1.5.2",
     "typescript": "~5.9.2"
+  },
+  "lint-staged": {
+    "assets/icon/*.svg": [
+      "npm run generate:icons",
+      "git add components/Icon.tsx"
+    ]
   },
   "private": true
 }
