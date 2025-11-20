@@ -39,11 +39,8 @@
     "@commitlint/config-conventional": "^20.0.0",
     "@react-native/eslint-config": "^0.82.1",
     "@types/react": "~19.1.10",
-<<<<<<< Updated upstream
     "babel-plugin-module-resolver": "^5.0.2",
-=======
     "chokidar-cli": "^3.0.0",
->>>>>>> Stashed changes
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
