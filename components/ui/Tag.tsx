@@ -31,7 +31,7 @@ export default function Tag({
     borderColor,
     variant = 'filled'
 }:TagProps){
-    const baseStyle = 'rounded-xl px-3 py-1';
+    const baseStyle = 'rounded-full px-3 py-1';
 
     if (variant === 'outlined') {
         // 테두리만 있는 스타일

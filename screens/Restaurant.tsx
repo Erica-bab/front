@@ -29,6 +29,7 @@ export default function RestuarantScreen() {
                         category={restaurant.category}
                         status={restaurant.status as '영업중' | '영업종료' | '브레이크타임'}
                         rating={restaurant.average_rating}
+                        restaurantId={restaurant.id.toString()}
                     />
                 ))}
             </SearchBar>
