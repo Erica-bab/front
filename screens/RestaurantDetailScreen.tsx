@@ -10,6 +10,7 @@ import RestaurantHomeTab from '@/components/restaurant/RestaurantHomeTab';
 import RestaurantMenuTab from '@/components/restaurant/RestaurantMenuTab';
 import RestaurantCommentsTab from '@/components/restaurant/RestaurantCommentsTab';
 import NaverMapWebView from '@/components/NaverMapWebView';
+import Icon from '@/components/Icon';
 
 type RestaurantTabType = 'home' | 'menu' | 'comments';
 
@@ -42,12 +43,18 @@ export default function RestaurantDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className='h-64'>
+      <View className='h-64 relative'>
         <NaverMapWebView
           latitude={restaurant.location.latitude ?? 0}
           longitude={restaurant.location.longitude ?? 0}
           name={restaurant.name}
         />
+        <Pressable
+          className='absolute top-4 left-4 bg-white rounded-full p-2 shadow'
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name='leftAngle' size={20} />
+        </Pressable>
       </View>
       <View className="flex-1">
         <View>
