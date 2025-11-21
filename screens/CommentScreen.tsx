@@ -1,32 +1,24 @@
 import { View, Text } from 'react-native';
-import Comments from '../components/ui/Comments';
-import TextIconBox from '../components/ui/TextIconBox';
-import CafeteriaInfo from '../components/cafeteria/CafeteriaInfo';
-import LocationIcon from '../assets/icon/location.svg';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import NaverMapWebView from '../components/NaverMapWebView';
+
+// 서울시청 좌표
+const SEOUL_CITY_HALL = {
+  latitude: 37.5666805,
+  longitude: 126.9784147,
+};
 
 export default function CommentScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Comments />
-      <TextIconBox 
-        preset="gray"
-        text="위치"
-      />
-      <TextIconBox 
-        preset="red"
-        text="위치"
-      />
-      <CafeteriaInfo
-        name="천원의 아침밥"
-        menu={["스팸마요 덮밥", "꼬치 어묵국", "고로케&케찹", "치커리유자청무침", "배추김치야채샐러드&드레싱"]}
-        location="창의인재원"
-      />
-      <TextIconBox 
-        preset="blue"
-        icon={LocationIcon}
-        text="위치 정보"
-      />
-      <LocationIcon width={50} height={50} color="#FF33FF"/>
-    </View>
+    <SafeAreaView className="flex-1 bg-white">
+      <Text className="text-xl font-bold p-4">지도 테스트 (서울시청)</Text>
+      <View className="flex-1">
+        <NaverMapWebView
+          latitude={SEOUL_CITY_HALL.latitude}
+          longitude={SEOUL_CITY_HALL.longitude}
+          name="서울시청"
+        />
+      </View>
+    </SafeAreaView>
   );
 }

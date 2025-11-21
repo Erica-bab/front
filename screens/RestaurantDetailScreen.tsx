@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
-// MapView는 Expo Go에서 지원하지 않음 - 네이티브 빌드 필요
-// import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,6 +9,7 @@ import TextIconButton from '@/components/ui/TextIconButton';
 import RestaurantHomeTab from '@/components/restaurant/RestaurantHomeTab';
 import RestaurantMenuTab from '@/components/restaurant/RestaurantMenuTab';
 import RestaurantCommentsTab from '@/components/restaurant/RestaurantCommentsTab';
+import NaverMapWebView from '@/components/NaverMapWebView';
 
 type RestaurantTabType = 'home' | 'menu' | 'comments';
 
@@ -43,9 +42,12 @@ export default function RestaurantDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className='h-64 bg-gray-200 justify-center items-center'>
-        <Text className='text-gray-500'>지도 영역</Text>
-        <Text className='text-gray-400 text-sm'>{restaurant.location.address}</Text>
+      <View className='h-64'>
+        <NaverMapWebView
+          latitude={restaurant.location.latitude ?? 0}
+          longitude={restaurant.location.longitude ?? 0}
+          name={restaurant.name}
+        />
       </View>
       <ScrollView className="flex-1">
         <View className='p-4'>
