@@ -71,7 +71,7 @@ function TabNavigator() {
         options={{
           title: '마이',
           headerShown: true,
-          headerTitle: '프로필',
+          headerTitle: '마이페이지',
           headerStyle: { backgroundColor: '#3B82F6' },
           headerTintColor: '#FFFFFF',
           headerTitleStyle: { fontWeight: 'bold' },
