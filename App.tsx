@@ -70,6 +70,11 @@ function TabNavigator() {
         component={ProfileScreen}
         options={{
           title: '마이',
+          headerShown: true,
+          headerTitle: '프로필',
+          headerStyle: { backgroundColor: '#3B82F6' },
+          headerTintColor: '#FFFFFF',
+          headerTitleStyle: { fontWeight: 'bold' },
           tabBarIcon: ({ color, size }) => (
             <MyIcon width={size} height={size} color={color} />
           ),
