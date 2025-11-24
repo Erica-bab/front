@@ -7,7 +7,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import CafeteriaScreen from './screens/CafeteriaScreen';
 import RestuarantScreen from './screens/Restaurant';
-import CafeScreen from './screens/CafeScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import FilterScreen from './screens/FilterScreen';
 import RestaurantDetailScreen from './screens/RestaurantDetailScreen';
@@ -50,17 +49,6 @@ function TabNavigator() {
           title: '학식',
           tabBarIcon: ({ color, size }) => (
             <SchoolIcon width={size} height={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tab.Screen
-        name="Cafe"
-        component={CafeScreen}
-        options={{
-          title: '카페',
-          tabBarIcon: ({ color, size }) => (
-            <CafeIcon width={size} height={size} color={color} />
           ),
         }}
       />
