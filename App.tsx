@@ -74,17 +74,6 @@ function TabNavigator() {
           ),
         }}
       />
-
-      <Tab.Screen
-        name="test"
-        component={CommentScreen}
-        options={{
-          title: 'test',
-          tabBarIcon: ({ color, size }) => (
-            <MyIcon width={size} height={size} color={color} />
-          ),
-        }}
-      />
     </Tab.Navigator>
   );
 }

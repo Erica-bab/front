@@ -1,21 +1,20 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { RestaurantCode, MealType } from '@/api/cafeteria/types';
 import TextIconButton from '@/components/ui/TextIconButton';
 import Icon from '@/components/Icon';
 
 type sortType = 'time' | 'location';
-type LocationType = 'student' | 'staff' | 'startup' | 'dorm';
-type TimeType = 'breakfast' | 'lunch' | 'dinner';
 
 interface CafeteriaHeaderProps {
   sortModeType: sortType;
   onChangeSortModeType: (type: sortType) => void;
 
-  selectedLocation: LocationType;
-  onChangeLocation: (type: LocationType) => void;
+  selectedLocation: RestaurantCode;
+  onChangeLocation: (type: RestaurantCode) => void;
 
-  selectedTime: TimeType;
-  onChangeTime: (type: TimeType) => void;
+  selectedTime: MealType;
+  onChangeTime: (type: MealType) => void;
 
   currentDate: Date;
   onPrevDate: () => void;
@@ -46,8 +45,16 @@ export default function CafeteriaHeader({
   onPrevDate,
   onNextDate,
 }: CafeteriaHeaderProps) {
+  const TabClasses = {
+    baseBoxClass: '-pb-4',
+    offTextClass: 'text-[#000000] font-medium text-xl',
+    onTextClass: 'text-[#2563EB] font-medium text-xl',
+    onBoxClass: 'border-b-2 border-[#2563EB] -pb-2',
+  };
+
   return (
-    <SafeAreaView className="w-full flex bg-white px-10">
+    <SafeAreaView className="w-full flex bg-white px-10 -mb-4">
+      {/* 정렬 버튼 */}
       <View className="flex-row justify-end -mr-4 mt-1">
         <ChangeSortButton
           sortModeType={sortModeType}
@@ -55,97 +62,80 @@ export default function CafeteriaHeader({
         />
       </View>
 
-      <View>
-        <View className="flex-row items-center justify-center mb-4 gap-2">
-          <TouchableOpacity onPress={onPrevDate}>
-            <Icon
-              name="rightAngle"
-              size={30}
-              style={{ transform: [{ rotate: '180deg' }] }}
-            />
-          </TouchableOpacity>
-          <Text className="font-bold text-4xl mt-1">
-            {formatDate(currentDate)}
-          </Text>
-          <Text className="font-medium text-xl mt-3 text-[#6B7280]">
-            {formatDay(currentDate)}
-          </Text>
-          <TouchableOpacity onPress={onNextDate}>
-            <Icon name="rightAngle" size={30} />
-          </TouchableOpacity>
-        </View>
+      {/* 날짜 */}
+      <View className="flex-row items-center justify-center mb-4 gap-2">
+        <TextIconButton
+          isOn={false}
+          iconName="rightAngle"
+          iconSize={25}
+          iconStyle={{ transform: [{ rotate: '180deg' }] }}
+          onPress={onPrevDate}
+          baseBoxClass="px-0 py-0"
+        />
+        <Text className="font-bold text-4xl mt-1">
+          {formatDate(currentDate)}
+        </Text>
+        <Text className="font-medium text-xl mt-3 text-[#6B7280] mr-2">
+          {formatDay(currentDate)}
+        </Text>
+        <TextIconButton
+          isOn={false}
+          iconName="rightAngle"
+          iconSize={25}
+          onPress={onNextDate}
+          baseBoxClass="px-0 py-0"
+        />
       </View>
 
-      {/* tab */}
+      {/* 탭 */}
       {sortModeType === 'time' ? (
-        // 위치
+        // 위치 탭
         <View className="w-full flex-row justify-around">
           <TextIconButton
-            isOn={selectedLocation === 'student'}
-            onPress={() => onChangeLocation('student')}
+            isOn={selectedLocation === 're12'}
+            onPress={() => onChangeLocation('re12')}
             text="학생"
-            baseBoxClass="-pb-4"
-            offTextClass="text-[#000000] font-medium text-xl"
-            onTextClass="text-[#2563EB] font-medium text-xl"
-            onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+            {...TabClasses}
           />
           <TextIconButton
-            isOn={selectedLocation === 'staff'}
-            onPress={() => onChangeLocation('staff')}
+            isOn={selectedLocation === 're11'}
+            onPress={() => onChangeLocation('re11')}
             text="교직원"
-            baseBoxClass="-pb-4"
-            offTextClass="text-[#000000] font-medium text-xl"
-            onTextClass="text-[#2563EB] font-medium text-xl"
-            onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+            {...TabClasses}
           />
           <TextIconButton
-            isOn={selectedLocation === 'startup'}
-            onPress={() => onChangeLocation('startup')}
+            isOn={selectedLocation === 're15'}
+            onPress={() => onChangeLocation('re15')}
             text="창업보육"
-            baseBoxClass="-pb-4"
-            offTextClass="text-[#000000] font-medium text-xl"
-            onTextClass="text-[#2563EB] font-medium text-xl"
-            onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+            {...TabClasses}
           />
           <TextIconButton
-            isOn={selectedLocation === 'dorm'}
-            onPress={() => onChangeLocation('dorm')}
+            isOn={selectedLocation === 're13'}
+            onPress={() => onChangeLocation('re13')}
             text="창의관"
-            baseBoxClass="-pb-4"
-            offTextClass="text-[#000000] font-medium text-xl"
-            onTextClass="text-[#2563EB] font-medium text-xl"
-            onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+            {...TabClasses}
           />
         </View>
       ) : (
-        // (조/중/석)
+        // 시간대 탭 (조/중/석)
         <View className="w-full flex-row justify-around">
           <TextIconButton
-            isOn={selectedTime === 'breakfast'}
-            onPress={() => onChangeTime('breakfast')}
+            isOn={selectedTime === '조식'}
+            onPress={() => onChangeTime('조식')}
             text="조식"
-            baseBoxClass="-pb-4"
-            offTextClass="text-[#000000] font-medium text-xl"
-            onTextClass="text-[#2563EB] font-medium text-xl"
-            onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+            {...TabClasses}
           />
           <TextIconButton
-            isOn={selectedTime === 'lunch'}
-            onPress={() => onChangeTime('lunch')}
+            isOn={selectedTime === '중식'}
+            onPress={() => onChangeTime('중식')}
             text="중식"
-            baseBoxClass="-pb-4"
-            offTextClass="text-[#000000] font-medium text-xl"
-            onTextClass="text-[#2563EB] font-medium text-xl"
-            onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+            {...TabClasses}
           />
           <TextIconButton
-            isOn={selectedTime === 'dinner'}
-            onPress={() => onChangeTime('dinner')}
+            isOn={selectedTime === '석식'}
+            onPress={() => onChangeTime('석식')}
             text="석식"
-            baseBoxClass="-pb-4"
-            offTextClass="text-[#000000] font-medium text-xl"
-            onTextClass="text-[#2563EB] font-medium text-xl"
-            onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+            {...TabClasses}
           />
         </View>
       )}
@@ -153,19 +143,24 @@ export default function CafeteriaHeader({
   );
 }
 
-
-function ChangeSortButton({ sortModeType, onChangeSortModeType }: { sortModeType: sortType; onChangeSortModeType: (type: sortType) => void; }) {
+function ChangeSortButton({
+  sortModeType,
+  onChangeSortModeType,
+}: {
+  sortModeType: sortType;
+  onChangeSortModeType: (type: sortType) => void;
+}) {
   const isTimeMode = sortModeType === 'time';
   const iconName = isTimeMode ? 'clock' : 'school';
   const nextMode: sortType = isTimeMode ? 'location' : 'time';
 
   return (
-    <TouchableOpacity
-      onPress={() => 
-        onChangeSortModeType(nextMode)
-      }
-    >
-      <Icon name={iconName} size={20}/>
-    </TouchableOpacity>
+    <TextIconButton
+      isOn={false}
+      iconName={iconName}
+      iconSize={20}
+      onPress={() => onChangeSortModeType(nextMode)}
+      baseBoxClass="px-2 py-1"
+    />
   );
 }

@@ -1,35 +1,56 @@
 import { View, Text } from 'react-native';
-import locationIcon from '../../assets/icon/location.svg';
-import TextIconBox from '../ui/TextIconBox';
+import TextIconBox from '@/components/ui/TextIconBox';
 
-interface cafeteriaProps {
-  name?: string,
-  price?: string,
-  menu?: string[],
-  location?: string,
+type sortType = 'time' | 'location';
+
+interface CafeteriaInfoProps {
+  name?: string;
+  price?: string;
+  menu?: string[];
+  location?: string;
+  sortModeType: sortType;
 }
 
-export default function CafeteriaInfo({ name = "천원의 아침밥", price = "1000", menu = ["스팸마요 덮밥", "꼬치 어묵국", "고로케&케찹", "치커리유자청무침", "배추김치야채샐러드&드레싱"], location = "창의인재" }: cafeteriaProps) {
+export default function CafeteriaInfo({
+  name = '',
+  price = '',
+  menu = [''],
+  location = '',
+  sortModeType,
+}: CafeteriaInfoProps) {
   return (
     <View className="flex flex-col border border-[#E5E5EC] rounded-xl w-full min-w-[40vh] px-[35px] py-[20px] bg-white">
+      {/* 상단: 메뉴 이름 + 가격 */}
       <View className="flex flex-row items-center mt-2">
-        <Text className="text-[#3B82F6] font-semibold text-xl mr-[5px]">{name}</Text>
+        <Text className="text-[#3B82F6] font-semibold text-xl mr-[5px]">
+          {name}
+        </Text>
         <Text className="text-[#6B6B6B] text-base mt-1">{price}원</Text>
       </View>
 
-      <View className="h-[1px] bg-gray-300 w-full my-[12px]"/>
+      <View className="h-[1px] bg-gray-300 w-full my-[12px]" />
 
+      {/* 메뉴 리스트 */}
       {menu.map((item, index) => (
-        <Text key={index} className="text-lg mb-[3px]">{item}</Text>
+        <Text key={index} className="text-lg mb-[3px]">
+          {"• " + item}
+        </Text>
       ))}
 
-      <TextIconBox
-        preset="white"
-        boxClass="justify-center bg-[#2563EB] rounded-2xl border-[#2563EB] border-2 mt-2"
-        textClass="text-[#2563EB] font-bold text-base text-[#FFFFFF]"
-        text={location}
-        icon="location"
-        />
+      {/* 장소 기준일 때만 하단 위치 뱃지 */}
+      {sortModeType === 'time' && (
+        <View className="mt-2 self-center w-full">
+          <TextIconBox
+            preset="blue"
+            boxClass="bg-[#2563EB] justify-center"
+            textClass="text-[#FFFFFF]"
+            text={location}
+            icon="location"
+            iconColor="#FFFFFF"
+            iconSize={16}
+          />
+        </View>
+      )}
     </View>
   );
 }

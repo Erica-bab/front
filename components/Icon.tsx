@@ -2,14 +2,14 @@ import { SvgProps } from 'react-native-svg';
 
 // 아이콘 import (자동 생성됨 - scripts/generate-icons.js)
 import BreakfastIcon from '@/assets/icon/breakfast.svg';
+import LunchIcon from '@/assets/icon/lunch.svg';
+import DinnerIcon from '@/assets/icon/dinner.svg';
 import CancelIcon from '@/assets/icon/cancel.svg';
 import ClockIcon from '@/assets/icon/clock.svg';
-import DinnerIcon from '@/assets/icon/dinner.svg';
 import DropdownIcon from '@/assets/icon/dropdown.svg';
 import FilterIcon from '@/assets/icon/filter.svg';
 import GoodIcon from '@/assets/icon/good.svg';
 import LocationIcon from '@/assets/icon/location.svg';
-import LunchIcon from '@/assets/icon/lunch.svg';
 import MeatballIcon from '@/assets/icon/meatball.svg';
 import RicericaIcon from '@/assets/icon/ricerica.svg';
 import RightAngleIcon from '@/assets/icon/right_angle.svg';

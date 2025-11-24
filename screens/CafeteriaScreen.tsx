@@ -2,15 +2,25 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import CafeteriaList from '@/components/cafeteria/CafeteriaList';
 import CafeteriaHeader from '@/components/cafeteria/CafeteriaHeader';
+import {
+  RestaurantCode,
+  MealType,
+  CafeteriaParams,
+} from '@/api/cafeteria/types';
+import { useCafeteria } from '@/api/cafeteria/useCafeteria';
 
-type sortType = 'time' | 'location';
-type LocationType = 'student' | 'staff' | 'startup' | 'dorm';
-type TimeType = 'breakfast' | 'lunch' | 'dinner';
+type SortType = 'time' | 'location';
 
 export default function SchoolRestaurantScreen() {
-  const [sortModeType, setSortModeType] = useState<sortType>('time');
-  const [selectedLocation, setSelectedLocation] = useState<LocationType>('student');
-  const [selectedTime, setSelectedTime] = useState<TimeType>('lunch');
+  const [sortModeType, setSortModeType] = useState<SortType>('time');
+
+  // 기본 장소: 학생식당
+  const [selectedLocation, setSelectedLocation] =
+    useState<RestaurantCode>('re12');
+
+  // 기본 시간대: 중식
+  const [selectedTime, setSelectedTime] = useState<MealType>('조식');
+
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const goPrevDay = () => {
@@ -29,40 +39,39 @@ export default function SchoolRestaurantScreen() {
     });
   };
 
-  console.log({
-    sortModeType,
-    selectedLocation,
-    selectedTime,
-    currentDate,
-  });
+  // 날짜 기준 하루치 전체 학식 데이터 호출
+  const cafeteriaParams: CafeteriaParams = {
+    year: currentDate.getFullYear(),
+    month: currentDate.getMonth() + 1,
+    day: currentDate.getDate(),
+    cafeteria_details: true,
+  };
+
+  const { data, isLoading, error } = useCafeteria(cafeteriaParams);
 
   return (
     <View className="flex-1 bg-white">
       <CafeteriaHeader
         sortModeType={sortModeType}
         onChangeSortModeType={setSortModeType}
-        
         selectedLocation={selectedLocation}
         onChangeLocation={setSelectedLocation}
-
         selectedTime={selectedTime}
         onChangeTime={setSelectedTime}
-
         currentDate={currentDate}
         onPrevDate={goPrevDay}
         onNextDate={goNextDay}
       />
 
-      {/* 나중에 필요하면 여기에도 props 넘겨서 필터링에 사용 */}
-      {/* 
       <CafeteriaList
         sortModeType={sortModeType}
         selectedLocation={selectedLocation}
         selectedTime={selectedTime}
         currentDate={currentDate}
+        data={data}
+        isLoading={isLoading}
+        error={error ?? null}
       />
-      */}
-      <CafeteriaList />
     </View>
   );
 }
