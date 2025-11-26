@@ -8,19 +8,19 @@ import {
 } from '@/api/restaurants/useReviewComment';
 import { useAuth } from '@/api/auth/useAuth';
 import { useLikedComments } from '@/api/user/useUserActivity';
+import { useLikedCommentIds } from '@/hooks/useLikedCommentIds';
+import { useMyRating } from '@/api/restaurants/useRating';
 import Icon from '@/components/Icon';
 import LoginPopup from '@/components/LoginPopup';
 import CommentItem from '@/components/restaurant/CommentItem';
 import CommentInput from '@/components/restaurant/CommentInput';
 import StarRating from '@/components/restaurant/StarRating';
-import { useLikedCommentIds } from '@/hooks/useLikedCommentIds';
 
 interface RestaurantCommentsTabProps {
   restaurant: RestaurantDetailResponse;
 }
 
 export default function RestaurantCommentsTab({ restaurant }: RestaurantCommentsTabProps) {
-  const [myRating, setMyRating] = useState(0);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [commentText, setCommentText] = useState('');
 
@@ -30,6 +30,7 @@ export default function RestaurantCommentsTab({ restaurant }: RestaurantComments
   const { mutate: createComment, isPending: isCreatingComment } = useCreateComment(restaurant.id);
   const { data: likedComments, refetch: refetchLikedComments } = useLikedComments(1, 100, isAuthenticated === true);
   const likedCommentIds = useLikedCommentIds(isAuthenticated === true);
+  const { myRating, refetchRatingStats } = useMyRating(restaurant.id, isAuthenticated === true);
 
   // 로그인 성공 시 팝업 자동 닫기
   useEffect(() => {
@@ -39,8 +40,14 @@ export default function RestaurantCommentsTab({ restaurant }: RestaurantComments
   }, [isAuthenticated, showLoginPopup]);
 
   const handleRating = (rating: number) => {
-    setMyRating(rating);
-    createOrUpdateRating({ rating });
+    createOrUpdateRating(
+      { rating },
+      {
+        onSuccess: () => {
+          refetchRatingStats();
+        },
+      }
+    );
   };
 
   const handleSubmitComment = () => {

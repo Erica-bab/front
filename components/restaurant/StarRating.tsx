@@ -15,7 +15,7 @@ export default function StarRating({ rating, onRate, isLoading }: StarRatingProp
           <Icon
             name="star"
             size={32}
-            color={star <= rating ? '#3B82F6' : '#D1D5DB'}
+            color={star <= rating ? '#FCD34D' : '#D1D5DB'} // 노란색으로 변경
           />
         </Pressable>
       ))}
