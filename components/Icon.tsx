@@ -15,6 +15,7 @@ import LocationIcon from '@/assets/icon/location.svg';
 import LunchIcon from '@/assets/icon/lunch.svg';
 import MeatballIcon from '@/assets/icon/meatball.svg';
 import PinIcon from '@/assets/icon/pin.svg';
+import ReplyIcon from '@/assets/icon/reply.svg';
 import RicericaIcon from '@/assets/icon/ricerica.svg';
 import RightAngleIcon from '@/assets/icon/right_angle.svg';
 import SchoolIcon from '@/assets/icon/school.svg';
@@ -42,6 +43,7 @@ const icons = {
   lunch: LunchIcon,
   meatball: MeatballIcon,
   pin: PinIcon,
+  reply: ReplyIcon,
   ricerica: RicericaIcon,
   rightAngle: RightAngleIcon,
   school: SchoolIcon,

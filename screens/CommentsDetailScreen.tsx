@@ -10,6 +10,7 @@ import { useLikedCommentIds } from '@/hooks/useLikedCommentIds';
 import Icon from '@/components/Icon';
 import LoginPopup from '@/components/LoginPopup';
 import CommentItem from '@/components/restaurant/CommentItem';
+import ReplyItem from '@/components/restaurant/ReplyItem';
 import CommentInput from '@/components/restaurant/CommentInput';
 
 export default function CommentDetailScreen() {
@@ -138,10 +139,9 @@ export default function CommentDetailScreen() {
               {replies
                 .filter(reply => reply && reply.id && reply.user && reply.content)
                 .map((reply) => (
-                  <CommentItem 
+                  <ReplyItem 
                     key={reply.id} 
                     comment={reply} 
-                    isReply
                     restaurantId={restaurantId || 0}
                     onDelete={handleDeleteComment}
                     onUpdateSuccess={refetchComments}

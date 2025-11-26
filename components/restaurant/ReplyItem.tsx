@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, TextInput, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { CommentItem as CommentItemType } from '@/api/restaurants/types';
 import {
   useToggleCommentLike,
@@ -13,7 +11,7 @@ import { useCurrentUser, useAuth } from '@/api/auth/useAuth';
 import Icon from '@/components/Icon';
 import { formatDate } from '@/utils/date';
 
-interface CommentItemProps {
+interface ReplyItemProps {
   comment: CommentItemType;
   restaurantId: number;
   likedCommentIds?: Set<number>;
@@ -21,11 +19,9 @@ interface CommentItemProps {
   onShowLogin?: () => void;
   onDelete?: (id: number) => void;
   onUpdateSuccess?: () => void;
-  showReplyButton?: boolean;
-  onReplyPress?: () => void;
 }
 
-export default function CommentItem({ 
+export default function ReplyItem({ 
   comment, 
   restaurantId, 
   likedCommentIds, 
@@ -33,10 +29,7 @@ export default function CommentItem({
   onShowLogin,
   onDelete,
   onUpdateSuccess,
-  showReplyButton = false,
-  onReplyPress,
-}: CommentItemProps) {
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+}: ReplyItemProps) {
   const { data: currentUser } = useCurrentUser();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { mutate: toggleLike } = useToggleCommentLike(restaurantId);
@@ -75,14 +68,6 @@ export default function CommentItem({
 
   // 현재 사용자가 댓글 작성자인지 확인
   const isMyComment = comment.user && comment.user.id && currentUser?.id === comment.user.id;
-
-  const handleReplyPress = () => {
-    if (onReplyPress) {
-      onReplyPress();
-    } else {
-      navigation.navigate('CommentDetail', { commentId: comment.id, restaurantId });
-    }
-  };
 
   const handleLikePress = () => {
     // 로그인 상태 확인
@@ -221,105 +206,107 @@ export default function CommentItem({
 
   return (
     <>
-      <View className="p-4 border-b border-gray-200 relative">
-        <View className="flex-row justify-between items-center mb-2">
-          <Text className="font-medium">{comment.user?.student_year || '익명'}</Text>
-          <View className="flex-row gap-3">
-            <Pressable className="flex-row gap-1 items-center" onPress={handleLikePress}>
-              <Icon 
-                name="good" 
-                size={16} 
-                color={isLiked ? "#3B82F6" : "#6B7280"} 
-              />
-              <Text className={isLiked ? "text-blue-500" : "text-gray-600"}>
-                {likeCount}
-              </Text>
-            </Pressable>
-            <View className="relative">
-              <Pressable onPress={handleMenuPress}>
-                <Icon name="meatball" size={16} color="#6B7280" />
-              </Pressable>
-              
-              {/* 메뉴 팝업 */}
-              {showMenu && (
-                <View
-                  className="absolute bg-white rounded-lg shadow-sm border border-gray-200 right-0 top-6 z-50"
-                  style={{
-                    minWidth: 80,
-                    elevation: 5,
-                  }}
-                >
-                  {isMyComment ? (
-                    <>
-                      <Pressable
-                        className="py-3 px-4 border-b border-gray-200"
-                        onPress={handleEdit}
-                      >
-                        <Text className="text-center">수정</Text>
-                      </Pressable>
-                      <Pressable
-                        className="py-3 px-4 border-b border-gray-200"
-                        onPress={handleDelete}
-                      >
-                        <Text className="text-center text-red-500">삭제</Text>
-                      </Pressable>
-                      <Pressable
-                        className="py-3 px-4"
-                        onPress={handleReport}
-                      >
-                        <Text className="text-center text-gray-600">신고</Text>
-                      </Pressable>
-                    </>
-                  ) : (
-                    <Pressable
-                      className="py-3 px-4"
-                      onPress={handleReport}
+      <View className="p-4 relative">
+        <View className="flex-row gap-2">
+          {/* Reply 아이콘 영역 */}
+          <View className="items-center pt-1">
+            <Icon name="reply" size={16} color="#6B7280" />
+          </View>
+          
+          {/* 내용 영역 - 회색 배경 버블 */}
+          <View className="flex-1 bg-gray-100 rounded-lg p-3">
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="font-medium">{comment.user?.student_year || '익명'}</Text>
+              <View className="flex-row gap-3">
+                <Pressable className="flex-row gap-1 items-center" onPress={handleLikePress}>
+                  <Icon 
+                    name="good" 
+                    size={16} 
+                    color={isLiked ? "#3B82F6" : "#6B7280"} 
+                  />
+                  <Text className={isLiked ? "text-blue-500" : "text-gray-600"}>
+                    {likeCount}
+                  </Text>
+                </Pressable>
+                <View className="relative">
+                  <Pressable onPress={handleMenuPress}>
+                    <Icon name="meatball" size={16} color="#6B7280" />
+                  </Pressable>
+                  
+                  {/* 메뉴 팝업 */}
+                  {showMenu && (
+                    <View
+                      className="absolute bg-white rounded-lg shadow-sm border border-gray-200 right-0 top-6 z-50"
+                      style={{
+                        minWidth: 80,
+                        elevation: 5,
+                      }}
                     >
-                      <Text className="text-center text-gray-600">신고</Text>
-                    </Pressable>
+                      {isMyComment ? (
+                        <>
+                          <Pressable
+                            className="py-3 px-4 border-b border-gray-200"
+                            onPress={handleEdit}
+                          >
+                            <Text className="text-center">수정</Text>
+                          </Pressable>
+                          <Pressable
+                            className="py-3 px-4 border-b border-gray-200"
+                            onPress={handleDelete}
+                          >
+                            <Text className="text-center text-red-500">삭제</Text>
+                          </Pressable>
+                          <Pressable
+                            className="py-3 px-4"
+                            onPress={handleReport}
+                          >
+                            <Text className="text-center text-gray-600">신고</Text>
+                          </Pressable>
+                        </>
+                      ) : (
+                        <Pressable
+                          className="py-3 px-4"
+                          onPress={handleReport}
+                        >
+                          <Text className="text-center text-gray-600">신고</Text>
+                        </Pressable>
+                      )}
+                    </View>
+                  )}
+
+                  {/* 신고 사유 메뉴 팝업 */}
+                  {showReportMenu && (
+                    <View
+                      className="absolute bg-white rounded-lg shadow-sm border border-gray-200 right-0 top-6 z-50"
+                      style={{
+                        minWidth: 200,
+                        maxWidth: 300,
+                        maxHeight: 400,
+                        elevation: 5,
+                      }}
+                    >
+                      <ScrollView className="max-h-96">
+                        {reportReasons.map((reason, index) => (
+                          <Pressable
+                            key={index}
+                            className={`py-3 px-4 ${
+                              index < reportReasons.length - 1 ? 'border-b border-gray-200' : ''
+                            }`}
+                            onPress={() => handleReportReasonSelect(reason.value)}
+                          >
+                            <Text className="text-gray-900">{reason.label}</Text>
+                          </Pressable>
+                        ))}
+                      </ScrollView>
+                    </View>
                   )}
                 </View>
-              )}
-
-              {/* 신고 사유 메뉴 팝업 */}
-              {showReportMenu && (
-                <View
-                  className="absolute bg-white rounded-lg shadow-sm border border-gray-200 right-0 top-6 z-50"
-                  style={{
-                    minWidth: 200,
-                    maxWidth: 300,
-                    maxHeight: 400,
-                    elevation: 5,
-                  }}
-                >
-                  <ScrollView className="max-h-96">
-                    {reportReasons.map((reason, index) => (
-                      <Pressable
-                        key={index}
-                        className={`py-3 px-4 ${
-                          index < reportReasons.length - 1 ? 'border-b border-gray-200' : ''
-                        }`}
-                        onPress={() => handleReportReasonSelect(reason.value)}
-                      >
-                        <Text className="text-gray-900">{reason.label}</Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
+              </View>
             </View>
+            <Text className="mb-2">{comment.content || ''}</Text>
+            <Text className="text-sm text-gray-500">{formatDate(comment.created_at)}</Text>
           </View>
         </View>
-        <Text className="mb-2">{comment.content || ''}</Text>
-        <Text className="text-sm text-gray-500 mb-2">{formatDate(comment.created_at)}</Text>
-        {showReplyButton && (
-          <Pressable className="flex-row gap-1 items-center" onPress={handleReplyPress}>
-            <Text className="text-blue-500">
-              {comment.replies && Array.isArray(comment.replies) && comment.replies.length > 0 ? `답글 ${comment.replies.length}개` : '답글쓰기'}
-            </Text>
-            <Icon name="rightAngle" size={8} color="black" />
-          </Pressable>
-        )}
       </View>
 
       {/* 배경 클릭 시 메뉴 닫기 */}
