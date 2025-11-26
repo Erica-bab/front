@@ -16,6 +16,13 @@ export function Dropdown({ label, options, selectedValue, onSelect, placeholder 
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
 
   const handleToggle = () => {
+    // 이미 값이 선택되어 있으면 선택 해제
+    if (selectedValue) {
+      onSelect(undefined as any);
+      return;
+    }
+
+    // 값이 없으면 드롭다운 토글
     if (onToggle) {
       onToggle();
     } else {
@@ -54,7 +61,8 @@ export function Dropdown({ label, options, selectedValue, onSelect, placeholder 
               <Pressable
                 key={option}
                 onPress={() => {
-                  onSelect(option);
+                  // 이미 선택된 항목을 클릭하면 선택 해제
+                  onSelect(selectedValue === option ? undefined as any : option);
                   if (onToggle) {
                     onToggle();
                   } else {
