@@ -200,7 +200,7 @@ export default function ProfileScreen() {
 
         <View className="flex-row justify-between p-2">
           <Text className="text-gray-400 text-sm">앱버전</Text>
-          <Text className="text-gray-400 text-sm">3.1.5(43)</Text>
+          <Text className="text-gray-400 text-sm">{require('../package.json').version}</Text>
         </View>
 
         {/* 로그인/로그아웃 버튼 */}
