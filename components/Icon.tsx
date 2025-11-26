@@ -31,6 +31,7 @@ import TelephoneIcon from '@/assets/icon/telephone.svg';
 import TriangleIcon from '@/assets/icon/triangle.svg';
 import UpAngleIcon from '@/assets/icon/up_angle.svg';
 import WarnningIcon from '@/assets/icon/warnning.svg';
+import filledGoodIcon from '@/assets/icon/good_filled.svg'
 
 // 아이콘 매핑
 const icons = {
@@ -46,6 +47,7 @@ const icons = {
   dropdown: DropdownIcon,
   filter: FilterIcon,
   good: GoodIcon,
+  filledgood: filledGoodIcon,
   leftAngle: LeftAngleIcon,
   location: LocationIcon,
   lunch: LunchIcon,
