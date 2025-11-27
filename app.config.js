@@ -16,11 +16,11 @@ export default {
     splash: {
       image: "./assets/app/splash-icon.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      backgroundColor: "#3072F0"
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.efoo.front",
+      bundleIdentifier: "com.efoo.app",
       usesAppleSignIn: true,
       infoPlist: {
         NSLocationWhenInUseUsageDescription: "주변 맛집을 위치순으로 정렬하기 위해 위치 정보가 필요합니다."
@@ -32,7 +32,7 @@ export default {
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/app/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        backgroundColor: "#3072F0"
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
