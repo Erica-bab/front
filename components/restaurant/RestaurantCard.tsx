@@ -41,7 +41,7 @@ export default function RestaurantCard({ name, category, operatingStatus, rating
         <Text className="ml-1">{category}</Text>
       </View>
       <RestaurantStatusTag operatingStatus={operatingStatus} rating={rating} onRatingPress={handleRatingPress} />
-      <View className="flex-row gap-2 h-[200px] bg-gray-100">
+      {/* <View className="flex-row gap-2 h-[200px] bg-gray-100">
         {[0, 1, 2].map(index => {
           const url = displayThumbnails[index];
           return url ? (
@@ -58,7 +58,8 @@ export default function RestaurantCard({ name, category, operatingStatus, rating
             </View>
           );
         })}
-      </View>
+      </View> */}
+
       {displayComment && (
         <Pressable
           className='bg-gray-100 flex-row rounded-lg p-4 w-full justify-between items-center gap-2'
