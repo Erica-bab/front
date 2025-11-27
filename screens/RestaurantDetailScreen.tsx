@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useRestaurantDetail } from '@/api/restaurants/useRestaurant';
+import { apiClient } from '@/api/client';
 import { useCreateComment } from '@/api/restaurants/useReviewComment';
 import { useAuth } from '@/api/auth/useAuth';
 import { toggleBookmark, checkIsBookmarked } from '@/services/bookmarkStoarge';
@@ -36,20 +37,40 @@ export default function RestaurantDetailScreen() {
   // 북마크 상태 확인
   useEffect(() => {
     const loadBookmarkStatus = async () => {
-      if (restaurantId) {
-        const bookmarked = await checkIsBookmarked(String(restaurantId));
-        setIsBookmarked(bookmarked);
+      if (!restaurantId) return;
+      try {
+        if (!isAuthLoading && isAuthenticated) {
+          const { data } = await apiClient.get<{ is_bookmarked: boolean }>(
+            `/users/me/bookmarks/${restaurantId}/check`,
+          );
+          setIsBookmarked(Boolean(data?.is_bookmarked));
+        } else {
+          const bookmarked = await checkIsBookmarked(String(restaurantId));
+          setIsBookmarked(bookmarked);
+        }
+      } catch (err) {
+        console.error('Failed to load bookmark status:', err);
       }
     };
     loadBookmarkStatus();
-  }, [restaurantId]);
+  }, [restaurantId, isAuthenticated, isAuthLoading]);
 
   // 북마크 토글 핸들러
   const handleBookmarkPress = async () => {
     if (!restaurantId) return;
     try {
-      const newBookmarkState = await toggleBookmark(String(restaurantId));
-      setIsBookmarked(newBookmarkState);
+      if (!isAuthLoading && isAuthenticated) {
+        if (isBookmarked) {
+          await apiClient.delete(`/users/me/bookmarks/${restaurantId}`);
+          setIsBookmarked(false);
+        } else {
+          await apiClient.post(`/users/me/bookmarks/${restaurantId}`);
+          setIsBookmarked(true);
+        }
+      } else {
+        const newBookmarkState = await toggleBookmark(String(restaurantId));
+        setIsBookmarked(newBookmarkState);
+      }
     } catch (error) {
       console.error('Failed to toggle bookmark:', error);
     }
