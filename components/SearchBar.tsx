@@ -115,16 +115,12 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
           });
 
           if (address) {
-            // 도로명 주소 포맷: 시/구/동/도로명/건물번호까지 표시
-            const parts = [
-              address.city,
-              address.district,
-              address.subregion,
-              address.street,
-              address.streetNumber,
-              address.name // 건물명이나 상세 주소
-            ].filter(Boolean);
-            setLocationText(parts.join(' ') || '현재위치');
+            // 주소를 그대로 표시
+            const addressText = address.formattedAddress ||
+              [address.region, address.city, address.district, address.subregion, address.street, address.streetNumber]
+                .filter(Boolean)
+                .join(' ');
+            setLocationText(addressText || '현재위치');
           }
         }
       } catch (error) {

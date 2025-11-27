@@ -80,7 +80,7 @@ export default function RestaurantDetailScreen() {
   const handleSharePress = async () => {
     if (!restaurant) return;
     try {
-      const shareUrl = `https://에리카밥.com/restaurant/${restaurantId}`;
+      const shareUrl = `https://에리카밥.com/share/${restaurantId}`;
       const shareMessage = `${restaurant.name} - ${restaurant.category}\n⭐ ${restaurant.rating.average.toFixed(1)}\n${restaurant.location.address || '위치 정보 없음'}\n\n${shareUrl}`;
 
       await Share.share({
