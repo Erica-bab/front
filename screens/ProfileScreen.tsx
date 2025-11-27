@@ -102,7 +102,7 @@ export default function ProfileScreen() {
         break;
       case 'terms':
         try {
-          const url = 'https://에리카밥.com/about/service';
+          const url = 'https://에리카밥.com/about/services';
           const canOpen = await Linking.canOpenURL(url);
           if (canOpen) {
             await Linking.openURL(url);

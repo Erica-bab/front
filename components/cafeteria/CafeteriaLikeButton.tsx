@@ -65,12 +65,17 @@ export default function CafeteriaLikeButton({ like, meal_id, auth, onShowLogin }
       { meal_id },
       {
         onSuccess: res => {
+          console.log('toggleLike API response:', res);
           const nextLiked = res.is_like;
+          console.log('Setting isLiked to:', nextLiked, 'from API response');
           setIsLiked(nextLiked);
 
+          // API 응답의 like_count 우선 사용, 없을 경우만 로컬 계산
           if (typeof res.like_count === 'number') {
+            console.log('Setting likeCount to API value:', res.like_count);
             setLikeCount(res.like_count);
           } else {
+            console.log('Calculating likeCount locally, prev +', nextLiked ? 1 : -1);
             setLikeCount(prev => prev + (nextLiked ? 1 : -1));
           }
         },

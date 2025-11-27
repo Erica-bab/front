@@ -99,11 +99,15 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
   });
 
   useEffect(() => {
+    let mounted = true;
+
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
+        if (status === 'granted' && mounted) {
           const location = await Location.getCurrentPositionAsync({});
+          if (!mounted) return;
+
           setCurrentLocation({
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -114,10 +118,10 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
             longitude: location.coords.longitude,
           });
 
-          if (address) {
+          if (address && mounted) {
             // 주소를 그대로 표시
             const addressText = address.formattedAddress ||
-              [address.region, address.city, address.district, address.subregion, address.street, address.streetNumber]
+              [address.region, address.city, address.district,'|', address.subregion, address.street, address.streetNumber]
                 .filter(Boolean)
                 .join(' ');
             setLocationText(addressText || '현재위치');
@@ -127,6 +131,10 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
         console.error('Failed to get location:', error);
       }
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleSearch = useCallback(() => {
