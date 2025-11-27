@@ -110,16 +110,43 @@ export default function ProfileScreen() {
         }
         break;
       case 'terms':
-        // TODO: 이용약관 구현
-        console.log('서비스 이용약관');
+        try {
+          const url = 'https://www.notion.so/2b5e2e83b83680a4acb1eb3aadb6fd76';
+          const canOpen = await Linking.canOpenURL(url);
+          if (canOpen) {
+            await Linking.openURL(url);
+          } else {
+            console.error('Cannot open URL:', url);
+          }
+        } catch (error) {
+          console.error('Failed to open terms link:', error);
+        }
         break;
       case 'privacy':
-        // TODO: 개인정보 처리방침 구현
-        console.log('개인정보 처리방침');
+        try {
+          const url = 'https://www.notion.so/2b5e2e83b8368078a7f4ed0f5347a31f';
+          const canOpen = await Linking.canOpenURL(url);
+          if (canOpen) {
+            await Linking.openURL(url);
+          } else {
+            console.error('Cannot open URL:', url);
+          }
+        } catch (error) {
+          console.error('Failed to open privacy link:', error);
+        }
         break;
       case 'about':
-        // TODO: 만든사람 구현
-        console.log('만든사람');
+        try {
+          const url = 'https://www.notion.so/2b5e2e83b83680f38589d9fb508c102f';
+          const canOpen = await Linking.canOpenURL(url);
+          if (canOpen) {
+            await Linking.openURL(url);
+          } else {
+            console.error('Cannot open URL:', url);
+          }
+        } catch (error) {
+          console.error('Failed to open about link:', error);
+        }
         break;
     }
   };
