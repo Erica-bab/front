@@ -1,57 +1,41 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from '@/components/Icon';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { CafeteriaLikeParams } from '@/api/cafeteria/types';
 import { useCafeteriaLike, useToggleCafeteriaLike } from '@/api/cafeteria/useCafeteria';
 import { useAuth } from '@/api/auth/useAuth';
 
 interface CafeteriaLikeProps {
-  like: number,
-  meal_id: number
-  auth?: boolean,
+  like: number;
+  meal_id: number;
+  auth?: boolean;          // 지금은 안 쓰고 있음
   onShowLogin?: () => void;
 }
 
-export default function CafeteriaLikeButton({ like, meal_id, auth, onShowLogin }: CafeteriaLikeProps) {
+export default function CafeteriaLikeButton({
+  like,
+  meal_id,
+  onShowLogin,
+}: CafeteriaLikeProps) {
+  const queryClient = useQueryClient();
+
   const { mutate: toggleLike, isPending } = useToggleCafeteriaLike();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(like);
 
-  console.log('CafeteriaLikeButton debug:', {
-    isAuthenticated,
-    isAuthLoading,
-    isLiked,
-    likeCount,
-    meal_id
-  });
-
-  // 로그아웃 시 로컬 상태 리셋
-  useEffect(() => {
-    if (!isAuthenticated && !isAuthLoading) {
-      setIsLiked(false);
-      setLikeCount(like);
-    }
-  }, [isAuthenticated, isAuthLoading, like]);
-
-  const cafeteriaLikeParams: CafeteriaLikeParams = {
-    meal_id: meal_id,
-  };
+  const cafeteriaLikeParams: CafeteriaLikeParams = { meal_id };
 
   const { data, isLoading: isDataLoading } = useCafeteriaLike(cafeteriaLikeParams);
 
-  useEffect(() => {
-    console.log('useCafeteriaLike data changed:', { data, isDataLoading, isAuthenticated });
-    if (!data) return;
-    const liked = data.user_reaction === 'like';
-    console.log('Setting isLiked to:', liked, 'based on data.user_reaction:', data.user_reaction);
-    setIsLiked(liked);
 
-    if (typeof data.like_count === 'number') {
-      setLikeCount(data.like_count);
-    }
-  }, [data, isAuthenticated]);
+  const isLiked =
+    !!isAuthenticated && data?.user_reaction === 'like';
+
+  const likeCount =
+    typeof data?.like_count === 'number'
+      ? data.like_count
+      : like;
 
   const handlePress = () => {
     if (!isAuthenticated && !isAuthLoading) {
@@ -64,24 +48,15 @@ export default function CafeteriaLikeButton({ like, meal_id, auth, onShowLogin }
     toggleLike(
       { meal_id },
       {
-        onSuccess: res => {
+        onSuccess: (res) => {
           console.log('toggleLike API response:', res);
-          const nextLiked = res.is_like;
-          console.log('Setting isLiked to:', nextLiked, 'from API response');
-          setIsLiked(nextLiked);
 
-          // API 응답의 like_count 우선 사용, 없을 경우만 로컬 계산
-          if (typeof res.like_count === 'number') {
-            console.log('Setting likeCount to API value:', res.like_count);
-            setLikeCount(res.like_count);
-          } else {
-            console.log('Calculating likeCount locally, prev +', nextLiked ? 1 : -1);
-            setLikeCount(prev => prev + (nextLiked ? 1 : -1));
-          }
+          queryClient.invalidateQueries({
+            queryKey: ['cafeteriaLike', meal_id],
+          });
         },
         onError: (err) => {
           console.log('toggle like error', err?.response?.data);
-          // 403 에러 시 로그인 팝업 표시
           if (err?.response?.status === 403) {
             onShowLogin?.();
           }
@@ -95,7 +70,7 @@ export default function CafeteriaLikeButton({ like, meal_id, auth, onShowLogin }
       <TouchableOpacity
         onPress={handlePress}
         activeOpacity={0.8}
-        disabled={isPending}
+        disabled={isPending || isDataLoading}
         className="flex-row items-center rounded-3xl border-2 border-[#3B82F6] bg-white px-3 py-1"
       >
         <Icon
