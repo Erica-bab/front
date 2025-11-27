@@ -5,7 +5,8 @@ export interface College {
 
 export interface User {
   id: number;
-  google_id: string;
+  google_id?: string;
+  apple_id?: string;
   email: string;
   student_year: string | null;
   college: College | null;
@@ -24,6 +25,17 @@ export interface GoogleLoginRequest {
   id_token?: string;  // 웹/안드로이드용
   authorization_code?: string;  // iOS용
   redirect_uri?: string;  // iOS용 (Authorization Code 사용 시 필수)
+}
+
+export interface AppleLoginRequest {
+  identity_token: string;
+  user?: {
+    email: string;
+    name?: {
+      firstName: string;
+      lastName: string;
+    };
+  };
 }
 
 export interface AuthResponse {
