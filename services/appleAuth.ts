@@ -6,11 +6,9 @@ import { useQueryClient } from '@tanstack/react-query';
 
 export const useAppleSignIn = (onSuccess?: (user?: any) => void) => {
   const { mutate: appleLogin, isPending, isError, error } = useAppleLogin();
-  const queryClient = useQueryClient();
   const isProcessing = useRef(false);
 
   const signIn = async () => {
-    // Apple Sign In은 iOS에서만 작동
     if (Platform.OS !== 'ios') {
       console.warn('Apple Sign In is only available on iOS');
       return;
@@ -41,15 +39,25 @@ export const useAppleSignIn = (onSuccess?: (user?: any) => void) => {
           identity_token: credential.identityToken,
         };
 
-        // 사용자 정보가 있으면 추가 (첫 로그인 시에만 제공됨)
-        if (credential.email || credential.fullName) {
-          requestData.user = {
-            email: credential.email || '',
-            name: credential.fullName ? {
+        // 사용자 정보가 실제로 있을 때만 추가 (첫 로그인 시에만 제공됨)
+        if (credential.email || (credential.fullName?.givenName || credential.fullName?.familyName)) {
+          const userData: any = {};
+
+          if (credential.email) {
+            userData.email = credential.email;
+          }
+
+          if (credential.fullName?.givenName || credential.fullName?.familyName) {
+            userData.name = {
               firstName: credential.fullName.givenName || '',
               lastName: credential.fullName.familyName || '',
-            } : undefined,
-          };
+            };
+          }
+
+          // userData에 실제 값이 있을 때만 추가
+          if (Object.keys(userData).length > 0) {
+            requestData.user = userData;
+          }
         }
 
         console.log('Sending Apple credential to backend');

@@ -29,7 +29,7 @@ export default function RestaurantCard({ name, category, status, rating, comment
 
   const handleRatingPress = () => {
     if (restaurantId) {
-      navigation.navigate('CommentDetail', { restaurantId });
+      navigation.navigate('RestaurantDetail', { restaurantId, initialTab: 'comments' });
     }
   };
 
@@ -39,7 +39,7 @@ export default function RestaurantCard({ name, category, status, rating, comment
         <Text className="text-lg text-blue-500">{name}</Text>
         <Text className="ml-1">{category}</Text>
       </View>
-      <RestaurantStatusTag status={status} rating={rating} />
+      <RestaurantStatusTag status={status} rating={rating} onRatingPress={handleRatingPress} />
       <View className="flex-row gap-2 h-[200px] bg-gray-100">
         {[0, 1, 2].map(index => {
           const url = displayThumbnails[index];
