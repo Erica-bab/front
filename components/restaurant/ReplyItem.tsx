@@ -7,7 +7,7 @@ import {
   useDeleteComment,
   useReportComment,
 } from '@/api/restaurants/useReviewComment';
-import { useCurrentUser, useAuth } from '@/api/auth/useAuth';
+import { useAuth } from '@/api/auth/useAuth';
 import Icon from '@/components/Icon';
 import { formatDate } from '@/utils/date';
 
@@ -15,6 +15,7 @@ interface ReplyItemProps {
   comment: CommentItemType;
   restaurantId: number;
   likedCommentIds?: Set<number>;
+  myCommentIds?: Set<number>;
   onLikeToggle?: () => void;
   onShowLogin?: () => void;
   onDelete?: (id: number) => void;
@@ -25,12 +26,12 @@ export default function ReplyItem({
   comment, 
   restaurantId, 
   likedCommentIds, 
+  myCommentIds,
   onLikeToggle,
   onShowLogin,
   onDelete,
   onUpdateSuccess,
 }: ReplyItemProps) {
-  const { data: currentUser } = useCurrentUser();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { mutate: toggleLike } = useToggleCommentLike(restaurantId);
   const { mutate: updateComment, isPending: isUpdating } = useUpdateComment(restaurantId, comment.id);
@@ -66,8 +67,8 @@ export default function ReplyItem({
     setLikeCount(comment.like_count ?? 0);
   }, [comment.like_count]);
 
-  // 현재 사용자가 댓글 작성자인지 확인
-  const isMyComment = comment.user && comment.user.id && currentUser?.id === comment.user.id;
+  // 현재 사용자가 댓글 작성자인지 확인 (/users/me/activities 사용)
+  const isMyComment = myCommentIds?.has(comment.id) ?? false;
 
   const handleLikePress = () => {
     // 로그인 상태 확인

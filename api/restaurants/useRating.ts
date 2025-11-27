@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../client';
 import { RatingItem } from './types';
-import { useCurrentUser } from '../auth/useAuth';
+import { useMyFavorites } from '../user/useUserActivity';
 
 interface RatingStatsResponse {
   average: number;
@@ -28,15 +28,18 @@ export const useRatingStats = (restaurantId: number, enabled: boolean = true) =>
   });
 };
 
-// 현재 사용자의 별점 조회 (recent_ratings에서 현재 사용자 찾기)
+// 현재 사용자의 별점 조회 (/users/me/activities?category=favorites 사용)
 export const useMyRating = (restaurantId: number, enabled: boolean = true) => {
-  const { data: ratingStats, refetch: refetchRatingStats } = useRatingStats(restaurantId, enabled);
-  const { data: currentUser } = useCurrentUser();
+  const { data: favorites, refetch: refetchFavorites } = useMyFavorites(1, 100, enabled);
 
-  const myRating = ratingStats?.recent_ratings.find(
-    (rating) => rating.user.id === currentUser?.id
+  // 특정 식당에 대한 내 별점 찾기
+  const myFavorite = favorites?.find(
+    (favorite) => favorite.restaurant_id === restaurantId
   );
 
-  return { myRating: myRating?.rating || 0, refetchRatingStats };
+  return { 
+    myRating: myFavorite?.rating || 0, 
+    refetchRatingStats: refetchFavorites 
+  };
 };
 

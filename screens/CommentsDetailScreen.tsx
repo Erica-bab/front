@@ -5,8 +5,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useDeleteComment, useCreateComment, useComments } from '@/api/restaurants/useReviewComment';
 import { useAuth } from '@/api/auth/useAuth';
-import { useLikedComments } from '@/api/user/useUserActivity';
+import { useLikedComments, useMyComments, useMyReplies } from '@/api/user/useUserActivity';
 import { useLikedCommentIds } from '@/hooks/useLikedCommentIds';
+import { useMyCommentIds } from '@/hooks/useMyCommentIds';
 import Icon from '@/components/Icon';
 import CommentItem from '@/components/restaurant/CommentItem';
 import ReplyItem from '@/components/restaurant/ReplyItem';
@@ -25,7 +26,10 @@ export default function CommentDetailScreen() {
   
   // 인증된 경우에만 좋아요한 댓글 목록 조회 (limit 최대값 100)
   const { refetch: refetchLikedComments } = useLikedComments(1, 100, isAuthenticated === true);
+  const { refetch: refetchMyComments } = useMyComments(1, 100, isAuthenticated === true);
+  const { refetch: refetchMyReplies } = useMyReplies(1, 100, isAuthenticated === true);
   const likedCommentIds = useLikedCommentIds(isAuthenticated === true);
+  const myCommentIds = useMyCommentIds(isAuthenticated === true);
   
   // 원댓글과 대댓글 찾기
   const comment = commentsData?.comments.find(c => c.id === commentId);
@@ -123,8 +127,13 @@ export default function CommentDetailScreen() {
                   comment={comment} 
                   restaurantId={restaurantId || 0}
                   onDelete={handleDeleteComment}
-                  onUpdateSuccess={refetchComments}
+                  onUpdateSuccess={() => {
+                    refetchComments();
+                    refetchMyComments();
+                    refetchMyReplies();
+                  }}
                   likedCommentIds={likedCommentIds}
+                  myCommentIds={myCommentIds}
                   onLikeToggle={refetchLikedComments}
                   onShowLogin={handleShowLogin}
                 />
@@ -139,8 +148,13 @@ export default function CommentDetailScreen() {
                     comment={reply} 
                     restaurantId={restaurantId || 0}
                     onDelete={handleDeleteComment}
-                    onUpdateSuccess={refetchComments}
+                    onUpdateSuccess={() => {
+                      refetchComments();
+                      refetchMyComments();
+                      refetchMyReplies();
+                    }}
                     likedCommentIds={likedCommentIds}
+                    myCommentIds={myCommentIds}
                     onLikeToggle={refetchLikedComments}
                     onShowLogin={handleShowLogin}
                   />

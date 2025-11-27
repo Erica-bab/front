@@ -5,8 +5,9 @@ import {
   useCreateOrUpdateRating,
 } from '@/api/restaurants/useReviewComment';
 import { useAuth } from '@/api/auth/useAuth';
-import { useLikedComments } from '@/api/user/useUserActivity';
+import { useLikedComments, useMyComments, useMyReplies } from '@/api/user/useUserActivity';
 import { useLikedCommentIds } from '@/hooks/useLikedCommentIds';
+import { useMyCommentIds } from '@/hooks/useMyCommentIds';
 import { useMyRating } from '@/api/restaurants/useRating';
 import CommentItem from '@/components/restaurant/CommentItem';
 import StarRating from '@/components/restaurant/StarRating';
@@ -21,7 +22,10 @@ export default function RestaurantCommentsTab({ restaurant, onShowLogin }: Resta
   const { data: commentsData, isLoading: isCommentsLoading } = useComments(restaurant.id);
   const { mutate: createOrUpdateRating, isPending: isRatingLoading } = useCreateOrUpdateRating(restaurant.id);
   const { refetch: refetchLikedComments } = useLikedComments(1, 100, isAuthenticated === true);
+  const { refetch: refetchMyComments } = useMyComments(1, 100, isAuthenticated === true);
+  const { refetch: refetchMyReplies } = useMyReplies(1, 100, isAuthenticated === true);
   const likedCommentIds = useLikedCommentIds(isAuthenticated === true);
+  const myCommentIds = useMyCommentIds(isAuthenticated === true);
   const { myRating, refetchRatingStats } = useMyRating(restaurant.id, isAuthenticated === true);
 
   const handleRating = (rating: number) => {
@@ -73,6 +77,7 @@ export default function RestaurantCommentsTab({ restaurant, onShowLogin }: Resta
               comment={comment}
               restaurantId={restaurant.id}
               likedCommentIds={likedCommentIds}
+              myCommentIds={myCommentIds}
               onLikeToggle={refetchLikedComments}
               onShowLogin={onShowLogin}
               showReplyButton

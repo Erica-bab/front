@@ -22,11 +22,45 @@ export interface LikedCommentActivity {
   created_at: string;
 }
 
+// 별점 활동 항목
+export interface FavoriteActivity {
+  restaurant_id: number;
+  restaurant_name: string | null;
+  rating: number;
+  created_at: string;
+}
+
+// 댓글 활동 항목
+export interface CommentActivity {
+  id: number;
+  content: string;
+  restaurant_id: number;
+  restaurant_name: string | null;
+  like_count: number;
+  created_at: string;
+}
+
+// 대댓글 활동 항목
+export interface ReplyActivity {
+  id: number;
+  content: string;
+  restaurant_id: number;
+  restaurant_name: string | null;
+  parent_comment_id: number;
+  parent_comment_content: string | null;
+  created_at: string;
+}
+
 // 사용자 활동 내역 응답
 export interface UserActivitiesResponse {
   summary: ActivitySummary;
   activities: {
+    bookmarks?: any[];
+    favorites?: FavoriteActivity[];
+    comments?: CommentActivity[];
+    replies?: ReplyActivity[];
     liked_comments?: LikedCommentActivity[];
+    edits?: any[];
     [key: string]: any;
   };
 }
@@ -63,6 +97,63 @@ export const useLikedComments = (page: number = 1, limit: number = 100, enabled:
         },
       });
       return data.activities.liked_comments || [];
+    },
+    enabled,
+    retry: false,
+  });
+};
+
+// 별점 준 식당 목록 조회
+export const useMyFavorites = (page: number = 1, limit: number = 100, enabled: boolean = true) => {
+  return useQuery<FavoriteActivity[]>({
+    queryKey: ['user', 'favorites', page, limit],
+    queryFn: async () => {
+      const { data } = await apiClient.get<UserActivitiesResponse>('/users/me/activities', {
+        params: {
+          category: 'favorites',
+          page,
+          limit,
+        },
+      });
+      return data.activities.favorites || [];
+    },
+    enabled,
+    retry: false,
+  });
+};
+
+// 작성한 댓글 목록 조회
+export const useMyComments = (page: number = 1, limit: number = 100, enabled: boolean = true) => {
+  return useQuery<CommentActivity[]>({
+    queryKey: ['user', 'comments', page, limit],
+    queryFn: async () => {
+      const { data } = await apiClient.get<UserActivitiesResponse>('/users/me/activities', {
+        params: {
+          category: 'comments',
+          page,
+          limit,
+        },
+      });
+      return data.activities.comments || [];
+    },
+    enabled,
+    retry: false,
+  });
+};
+
+// 작성한 대댓글 목록 조회
+export const useMyReplies = (page: number = 1, limit: number = 100, enabled: boolean = true) => {
+  return useQuery<ReplyActivity[]>({
+    queryKey: ['user', 'replies', page, limit],
+    queryFn: async () => {
+      const { data } = await apiClient.get<UserActivitiesResponse>('/users/me/activities', {
+        params: {
+          category: 'replies',
+          page,
+          limit,
+        },
+      });
+      return data.activities.replies || [];
     },
     enabled,
     retry: false,
