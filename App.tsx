@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as Linking from 'expo-linking';
 
 import CafeteriaScreen from './screens/CafeteriaScreen';
 import RestuarantScreen from './screens/Restaurant';
@@ -75,11 +76,25 @@ function TabNavigator() {
 }
 
 export default function App() {
+  const linking = {
+    prefixes: ['efoo://', 'https://에리카밥.com'],
+    config: {
+      screens: {
+        Main: 'main',
+        RestaurantDetail: 'restaurant/:restaurantId',
+        Filter: 'filter',
+        CommentDetail: 'comment/:commentId',
+        Bookmark: 'bookmark',
+        AddInfo: 'addinfo',
+      },
+    },
+  };
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <NavigationContainer>
+          <NavigationContainer linking={linking}>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="Main" component={TabNavigator} />
               <Stack.Screen
