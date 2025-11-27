@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import Icon from '@/components/Icon';
 import { useRestaurantSearch } from '@/api/restaurants/useRestaurant';
 import { SearchResultItem } from '@/api/restaurants/types';
+import MapModal from '@/components/cafeteria/MapModal';
 
 interface SearchScreenProps {
   children?: React.ReactNode;
@@ -88,6 +89,8 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
   const [searchText, setSearchText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [locationText, setLocationText] = useState('현재위치');
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState({ latitude: 0, longitude: 0 });
   const STICKY_THRESHOLD = 30;
 
   const { data: searchData, isLoading: isSearching } = useRestaurantSearch({
@@ -101,19 +104,25 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status === 'granted') {
           const location = await Location.getCurrentPositionAsync({});
+          setCurrentLocation({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+
           const [address] = await Location.reverseGeocodeAsync({
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
           });
 
           if (address) {
-            // 주소 포맷: 시/구/동/상세주소 형식으로 표시
+            // 도로명 주소 포맷: 시/구/동/도로명/건물번호까지 표시
             const parts = [
               address.city,
               address.district,
               address.subregion,
               address.street,
-              address.streetNumber
+              address.streetNumber,
+              address.name // 건물명이나 상세 주소
             ].filter(Boolean);
             setLocationText(parts.join(' ') || '현재위치');
           }
@@ -138,6 +147,7 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
   const isSearchMode = searchQuery.length > 0;
 
   return (
+    <>
     <Animated.ScrollView
       stickyHeaderIndices={[1]}
       className="flex-1 bg-[rgba(248, 250, 252, 1)]"
@@ -167,12 +177,16 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
         }}
       >
         <View className='w-full flex-row justify-between items-center h-full'>
-          <View className="flex-row items-center justify-center h-full gap-2">
+          <Pressable
+            className="flex-row items-center justify-center h-full gap-2"
+            onPress={() => setShowMapModal(true)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Text className="text-md font-semibold text-neutral-900">
               {locationText}
             </Text>
             <Icon name="dropdown" width={10} height={13} />
-          </View>
+          </Pressable>
           <Pressable
             onPress={onFilterPress ?? (() => navigation.navigate('Filter'))}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -239,5 +253,15 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
         children
       )}
     </Animated.ScrollView>
+
+    <MapModal
+      visible={showMapModal}
+      setVisible={setShowMapModal}
+      location={locationText}
+      latitude={currentLocation.latitude}
+      longtitude={currentLocation.longitude}
+      viewName="현재 위치"
+    />
+    </>
   );
 }
