@@ -2,8 +2,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from '@/components/Icon';
 import React, { useState, useEffect } from 'react';
 
-import { CafeteriaLikeParams, } from '@/api/cafeteria/types';
-import { useCafeteriaLike, useToggleCafeteriaLike, } from '@/api/cafeteria/useCafeteria';
+import { CafeteriaLikeParams } from '@/api/cafeteria/types';
+import { useCafeteriaLike, useToggleCafeteriaLike } from '@/api/cafeteria/useCafeteria';
 import { useAuth } from '@/api/auth/useAuth';
 
 interface CafeteriaLikeProps {
@@ -59,7 +59,7 @@ export default function CafeteriaLikeButton({ like, meal_id, auth, onShowLogin }
       return;
     }
 
-    if (isPending) return; // 중복 클릭 방지
+    if (isPending) return;
 
     toggleLike(
       { meal_id },
@@ -79,7 +79,7 @@ export default function CafeteriaLikeButton({ like, meal_id, auth, onShowLogin }
             setLikeCount(prev => prev + (nextLiked ? 1 : -1));
           }
         },
-        onError: err => {
+        onError: (err) => {
           console.log('toggle like error', err?.response?.data);
           // 403 에러 시 로그인 팝업 표시
           if (err?.response?.status === 403) {
