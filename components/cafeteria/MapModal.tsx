@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { View, Modal, Text, Pressable } from 'react-native';
 import NaverMapWebView from '@/components/NaverMapWebView';
 import TextIconButton from '@/components/ui/TextIconButton';
@@ -13,6 +14,8 @@ interface MapModalProps {
 }
 
 export default function MapModal({ location, latitude, longtitude, viewName, visible, setVisible }: MapModalProps) {
+  const [isMultiTouch, setIsMultiTouch] = useState(false);
+
   return (
     <Modal
       visible={visible}
@@ -20,15 +23,25 @@ export default function MapModal({ location, latitude, longtitude, viewName, vis
       animationType="fade"
       onRequestClose={() => setVisible(false)}
     >
-      {/* 반투명 배경 */}
       <Pressable
         className="flex-1 bg-black/40 justify-center items-center"
-        onPress={() => setVisible(false)} // 바깥 클릭 시 닫기
+        onTouchStart={(e) => {
+          if (e.nativeEvent.touches.length > 1) {
+            setIsMultiTouch(true);
+          }
+        }}
+        onPress={() => {
+          if (!isMultiTouch) {
+            setVisible(false);
+          }
+          setIsMultiTouch(false);
+        }}
       >
-        {/* 모달 박스 */}
         <Pressable
           className="w-4/5 bg-white rounded-2xl p-5"
-          onPress={() => {}}
+          onPress={(e) => {
+          e.stopPropagation();
+      }}
         >
           <View className="w-full h-64 mb-4 rounded-xl overflow-hidden border border-[#E5E5EC]">
             <NaverMapWebView
