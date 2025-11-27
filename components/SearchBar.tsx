@@ -1,7 +1,8 @@
 import { View, Text, TextInput, Pressable, Animated, ActivityIndicator } from 'react-native';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as Location from 'expo-location';
 import Icon from '@/components/Icon';
 import { useRestaurantSearch } from '@/api/restaurants/useRestaurant';
 import { SearchResultItem } from '@/api/restaurants/types';
@@ -86,12 +87,42 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
   const [scrollY] = useState(new Animated.Value(0));
   const [searchText, setSearchText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [locationText, setLocationText] = useState('현재위치');
   const STICKY_THRESHOLD = 30;
 
   const { data: searchData, isLoading: isSearching } = useRestaurantSearch({
     q: searchQuery,
     limit: 20,
   });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          const location = await Location.getCurrentPositionAsync({});
+          const [address] = await Location.reverseGeocodeAsync({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          });
+
+          if (address) {
+            // 주소 포맷: 시/구/동/상세주소 형식으로 표시
+            const parts = [
+              address.city,
+              address.district,
+              address.subregion,
+              address.street,
+              address.streetNumber
+            ].filter(Boolean);
+            setLocationText(parts.join(' ') || '현재위치');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to get location:', error);
+      }
+    })();
+  }, []);
 
   const handleSearch = useCallback(() => {
     if (searchText.trim()) {
@@ -138,7 +169,7 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
         <View className='w-full flex-row justify-between items-center h-full'>
           <View className="flex-row items-center justify-center h-full gap-2">
             <Text className="text-md font-semibold text-neutral-900">
-              경기 안산시 상록구 한양
+              {locationText}
             </Text>
             <Icon name="dropdown" width={10} height={13} />
           </View>

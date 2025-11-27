@@ -56,4 +56,5 @@ export interface TokenResponse {
 export interface UpdateUserRequest {
   student_year?: string;
   college_id?: number;
+  student_type?: 'student' | 'other';
 }

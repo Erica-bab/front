@@ -20,13 +20,19 @@ export default function RestaurantCard({ name, category, status, rating, comment
   const displayComment = comment || null;
   const displayThumbnails = thumbnailUrls?.slice(0, 3) || [];
 
+  const handleRatingPress = () => {
+    if (restaurantId) {
+      navigation.navigate('CommentDetail', { restaurantId });
+    }
+  };
+
   return (
     <Card className='bg-white border border-gray-100'>
       <View className="flex-row items-center">
         <Text className="text-lg text-blue-500">{name}</Text>
         <Text className="ml-1">{category}</Text>
       </View>
-      <RestaurantStatusTag status={status} rating={rating} />
+      <RestaurantStatusTag status={status} rating={rating} onRatingPress={handleRatingPress} />
       {displayThumbnails.length > 0 ? (
         <View className="flex-row gap-2 h-[100px]">
           {displayThumbnails.map((url, index) => (
