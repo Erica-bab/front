@@ -13,11 +13,12 @@ import TextIconButton from '@/components/ui/TextIconButton';
 import RestaurantHomeTab from '@/components/restaurant/RestaurantHomeTab';
 import RestaurantMenuTab from '@/components/restaurant/RestaurantMenuTab';
 import RestaurantCommentsTab from '@/components/restaurant/RestaurantCommentsTab';
+import RestaurantPhotosTab from '@/components/restaurant/RestaurantPhotosTab';
 import CommentInput from '@/components/restaurant/CommentInput';
 import NaverMapWebView from '@/components/NaverMapWebView';
 import Icon from '@/components/Icon';
 
-type RestaurantTabType = 'home' | 'menu' | 'comments';
+type RestaurantTabType = 'home' | 'menu' | 'comments' | 'photos';
 
 export default function RestaurantDetailScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -202,6 +203,15 @@ export default function RestaurantDetailScreen() {
                 onTextClass="text-[#2563EB] font-medium text-lg"
                 onBoxClass="border-b-2 border-[#2563EB] -pb-2"
               />
+              <TextIconButton
+                isOn={selectedTab === 'photos'}
+                onPress={() => setSelectedTab('photos')}
+                text="사진"
+                baseBoxClass="-pb-4"
+                offTextClass="text-[#000000] font-medium text-lg"
+                onTextClass="text-[#2563EB] font-medium text-lg"
+                onBoxClass="border-b-2 border-[#2563EB] -pb-2"
+              />
             </View>
           </View>
 
@@ -210,6 +220,12 @@ export default function RestaurantDetailScreen() {
           {selectedTab === 'menu' && <RestaurantMenuTab restaurant={restaurant} />}
           {selectedTab === 'comments' && (
             <RestaurantCommentsTab
+              restaurant={restaurant}
+              onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
+            />
+          )}
+          {selectedTab === 'photos' && (
+            <RestaurantPhotosTab
               restaurant={restaurant}
               onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
             />
