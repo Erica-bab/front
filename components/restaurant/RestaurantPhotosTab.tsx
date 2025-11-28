@@ -2,10 +2,12 @@ import { View, Text, ScrollView, Image, Pressable, Alert, ActivityIndicator, Dim
 import { RestaurantDetailResponse } from '@/api/restaurants/types';
 import { useRestaurantImages, useDeleteRestaurantImage } from '@/api/restaurants/useRestaurantImage';
 import { useAuth, useCurrentUser } from '@/api/auth/useAuth';
+import Icon from '@/components/Icon';
 
 interface RestaurantPhotosTabProps {
   restaurant: RestaurantDetailResponse;
   onShowLogin?: () => void;
+  onAddPhotoPress?: () => void;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -13,7 +15,7 @@ const IMAGE_GAP = 4;
 const IMAGES_PER_ROW = 3;
 const IMAGE_SIZE = (SCREEN_WIDTH - IMAGE_GAP * (IMAGES_PER_ROW + 1)) / IMAGES_PER_ROW;
 
-export default function RestaurantPhotosTab({ restaurant, onShowLogin }: RestaurantPhotosTabProps) {
+export default function RestaurantPhotosTab({ restaurant, onShowLogin, onAddPhotoPress }: RestaurantPhotosTabProps) {
   const { isAuthenticated } = useAuth();
   const { data: currentUser } = useCurrentUser();
   const { data: imagesData, isLoading, refetch: refetchImages } = useRestaurantImages(restaurant.id);
@@ -93,8 +95,24 @@ export default function RestaurantPhotosTab({ restaurant, onShowLogin }: Restaur
   }
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: IMAGE_GAP }}>
-      <View className="flex-row flex-wrap" style={{ marginHorizontal: -IMAGE_GAP / 2 }}>
+    <View className="flex-1 bg-white">
+      {/* 사진 추가하기 버튼 */}
+      <Pressable
+        onPress={() => {
+          if (!isAuthenticated) {
+            onShowLogin?.();
+          } else {
+            onAddPhotoPress?.();
+          }
+        }}
+        className="flex-row items-center justify-center gap-2 py-3 px-4 bg-gray-100 mx-4 mt-4 mb-2 rounded-lg"
+      >
+        <Icon name="edit" width={16} height={16} />
+        <Text className="text-gray-700 text-sm font-medium">사진 추가하기</Text>
+      </Pressable>
+
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: IMAGE_GAP }}>
+        <View className="flex-row flex-wrap" style={{ marginHorizontal: -IMAGE_GAP / 2 }}>
         {imageUrls.map((item, index) => (
           <View
             key={item.id}
@@ -123,8 +141,9 @@ export default function RestaurantPhotosTab({ restaurant, onShowLogin }: Restaur
             )}
           </View>
         ))}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

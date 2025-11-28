@@ -15,8 +15,10 @@ import RestaurantMenuTab from '@/components/restaurant/RestaurantMenuTab';
 import RestaurantCommentsTab from '@/components/restaurant/RestaurantCommentsTab';
 import RestaurantPhotosTab from '@/components/restaurant/RestaurantPhotosTab';
 import CommentInput from '@/components/restaurant/CommentInput';
+import ImageUploadModal from '@/components/restaurant/ImageUploadModal';
 import NaverMapWebView from '@/components/NaverMapWebView';
 import Icon from '@/components/Icon';
+import { useRestaurantImages } from '@/api/restaurants/useRestaurantImage';
 
 type RestaurantTabType = 'home' | 'menu' | 'comments' | 'photos';
 
@@ -31,6 +33,8 @@ export default function RestaurantDetailScreen() {
 
   const { data: restaurant, isLoading, error } = useRestaurantDetail(Number(restaurantId));
   const { mutate: createComment, isPending: isCommentLoading } = useCreateComment(Number(restaurantId));
+  const { refetch: refetchRestaurantImages } = useRestaurantImages(restaurant?.id || 0);
+  const [showImageUploadModal, setShowImageUploadModal] = useState(false);
 
   // 유저 액티비티 refetch (댓글 작성 후 업데이트용)
   const { refetch: refetchMyComments } = useMyComments(1, 100, isAuthenticated === true);
@@ -228,6 +232,7 @@ export default function RestaurantDetailScreen() {
             <RestaurantPhotosTab
               restaurant={restaurant}
               onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
+              onAddPhotoPress={() => setShowImageUploadModal(true)}
             />
           )}
         </View>
@@ -267,6 +272,22 @@ export default function RestaurantDetailScreen() {
             );
           }}
           isLoading={isCommentLoading}
+        />
+      )}
+
+      {/* 사진 추가 모달 - 최상위 레벨에서 렌더링 */}
+      {restaurant && (
+        <ImageUploadModal
+          restaurantId={restaurant.id}
+          visible={showImageUploadModal}
+          onClose={() => setShowImageUploadModal(false)}
+          onSuccess={() => {
+            refetchRestaurantImages();
+          }}
+          onShowLogin={() => {
+            setShowImageUploadModal(false);
+            (navigation.navigate as any)('Login', { onSuccess: refreshAuthState });
+          }}
         />
       )}
       </KeyboardAvoidingView>

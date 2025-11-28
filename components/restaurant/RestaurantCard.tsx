@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RestaurantOperatingStatus } from '@/api/restaurants/types';
 import { useRestaurantImages } from '@/api/restaurants/useRestaurantImage';
-import { useAuth } from '@/api/auth/useAuth';
 
 interface RestaurantCardProps {
   name: string;
@@ -16,12 +15,10 @@ interface RestaurantCardProps {
   comment?: string;
   restaurantId?: string;
   thumbnailUrls?: string[];
-  onAddPhotoPress?: (restaurantId: string) => void;
 }
 
-export default function RestaurantCard({ name, category, operatingStatus, rating, comment, restaurantId, thumbnailUrls, onAddPhotoPress }: RestaurantCardProps) {
+export default function RestaurantCard({ name, category, operatingStatus, rating, comment, restaurantId, thumbnailUrls }: RestaurantCardProps) {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const { isAuthenticated, refreshAuthState } = useAuth();
   const displayComment = comment || null;
   
   // 식당 이미지 조회 (restaurantId가 있을 때만)
@@ -96,23 +93,6 @@ export default function RestaurantCard({ name, category, operatingStatus, rating
           })}
         </View>
       </Pressable>
-
-      {/* 사진 추가하기 버튼 */}
-      {restaurantId && (
-        <Pressable
-          onPress={() => {
-            if (!isAuthenticated) {
-              (navigation.navigate as any)('Login', { onSuccess: refreshAuthState });
-            } else {
-              onAddPhotoPress?.(restaurantId);
-            }
-          }}
-          className="flex-row items-center justify-center gap-2 py-2 px-4 bg-gray-100 rounded-lg mb-2"
-        >
-          <Icon name="edit" width={16} height={16} />
-          <Text className="text-gray-700 text-sm">사진 추가하기</Text>
-        </Pressable>
-      )}
 
       {displayComment && (
         <Pressable
