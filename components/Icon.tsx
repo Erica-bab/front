@@ -4,6 +4,7 @@ import { SvgProps } from 'react-native-svg';
 import BookmarkIcon from '@/assets/icon/bookmark.svg';
 import Bookmark1Icon from '@/assets/icon/bookmark_1.svg';
 import BreakfastIcon from '@/assets/icon/breakfast.svg';
+import CameraIcon from '@/assets/icon/camera.svg';
 import CancelIcon from '@/assets/icon/cancel.svg';
 import ChatIcon from '@/assets/icon/chat.svg';
 import ClockIcon from '@/assets/icon/clock.svg';
@@ -14,6 +15,7 @@ import DropdownIcon from '@/assets/icon/dropdown.svg';
 import EditIcon from '@/assets/icon/edit.svg';
 import FilterIcon from '@/assets/icon/filter.svg';
 import FilterSelectedIcon from '@/assets/icon/filter_selected.svg';
+import GalleryIcon from '@/assets/icon/gallery.svg';
 import GoodIcon from '@/assets/icon/good.svg';
 import GoodFilledIcon from '@/assets/icon/good_filled.svg';
 import LeftAngleIcon from '@/assets/icon/left_angle.svg';
@@ -42,6 +44,7 @@ const icons = {
   bookmark: BookmarkIcon,
   bookmark1: Bookmark1Icon,
   breakfast: BreakfastIcon,
+  camera: CameraIcon,
   cancel: CancelIcon,
   chat: ChatIcon,
   clock: ClockIcon,
@@ -52,6 +55,7 @@ const icons = {
   edit: EditIcon,
   filter: FilterIcon,
   filterSelected: FilterSelectedIcon,
+  gallery: GalleryIcon,
   good: GoodIcon,
   goodFilled: GoodFilledIcon,
   leftAngle: LeftAngleIcon,

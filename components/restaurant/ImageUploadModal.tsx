@@ -28,7 +28,9 @@ export default function ImageUploadModal({
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { mutate: uploadImage, isPending: isUploading } = useUploadRestaurantImage(restaurantId);
 
-  const snapPoints = useMemo(() => ['60%'], []);
+  const snapPoints = useMemo(() => {
+    return selectedImage ? ['80%'] : ['45%'];
+  }, [selectedImage]);
 
   const pickImage = async () => {
     try {
@@ -153,6 +155,7 @@ export default function ImageUploadModal({
 
   return (
     <BottomSheetModal
+      key={selectedImage ? 'with-image' : 'without-image'}
       index={visible ? 0 : -1}
       snapPoints={snapPoints}
       enablePanDownToClose={true}
@@ -165,72 +168,92 @@ export default function ImageUploadModal({
       backgroundStyle={{ backgroundColor: 'white' }}
       handleIndicatorStyle={{ backgroundColor: '#D1D5DB' }}
       enableDynamicSizing={false}
+      animateOnMount={true}
     >
       <BottomSheetView style={{ flex: 1 }}>
-        <View className="px-6 py-4" style={{ paddingBottom: insets.bottom + 16 }}>
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xl font-bold">사진 추가</Text>
-            <Pressable onPress={handleClose}>
-              <Icon name="cancel" />
-            </Pressable>
-          </View>
-
-          {selectedImage ? (
-            <View className="mb-4">
-              <Image
-                source={{ uri: selectedImage }}
-                className="w-full h-64 rounded-lg"
-                resizeMode="cover"
-              />
-              <Pressable
-                className="mt-2 items-center"
-                onPress={() => setSelectedImage(null)}
-              >
-                <Text className="text-blue-500">다시 선택</Text>
+        <View 
+          className="px-6" 
+          style={{ 
+            flex: 1,
+            justifyContent: 'center',
+            paddingTop: 4,
+            paddingBottom: selectedImage 
+              ? Math.max(insets.bottom, 20) 
+              : Math.max(insets.bottom, 4)
+          }}
+        >
+          <View style={{ justifyContent: 'center' }}>
+            <View className="flex-row justify-between items-center mb-6">
+              <Text className="text-xl font-bold">사진 추가</Text>
+              <Pressable onPress={handleClose}>
+                <Icon name="cancel" />
               </Pressable>
             </View>
-          ) : (
-            <View className="mb-4 gap-3">
-              <Button
-                variant="secondary"
-                onPress={pickImage}
-                className="w-full"
-              >
-                <Text>갤러리에서 선택</Text>
-              </Button>
-              <Button
-                variant="secondary"
-                onPress={takePhoto}
-                className="w-full"
-              >
-                <Text>사진 촬영</Text>
-              </Button>
-            </View>
-          )}
 
-          {selectedImage && (
-            <View className="gap-2">
-              <Button
-                onPress={handleUpload}
-                disabled={isUploading}
-                className="w-full"
-              >
-                {isUploading ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <Text className="text-white font-semibold">업로드</Text>
-                )}
-              </Button>
-              <Button
-                variant="secondary"
-                onPress={handleClose}
-                disabled={isUploading}
-                className="w-full"
-              >
-                <Text>취소</Text>
-              </Button>
-            </View>
-          )}
+            {selectedImage ? (
+              <View className="mb-4">
+                <Image
+                  source={{ uri: selectedImage }}
+                  className="w-full h-64 rounded-lg"
+                  resizeMode="cover"
+                />
+                <Pressable
+                  className="mt-2 items-center"
+                  onPress={() => setSelectedImage(null)}
+                >
+                  <Text className="text-blue-500">다시 선택</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View className="mb-2">
+                <View className="flex-row gap-4 justify-center">
+                  {/* 갤러리 버튼 */}
+                  <Pressable
+                    onPress={pickImage}
+                    className="bg-gray-100 rounded-xl items-center justify-center"
+                    style={{ width: 140, height: 140 }}
+                  >
+                    <Icon name="gallery" width={48} height={48} color="#666" />
+                    <Text className="text-gray-700 text-sm font-medium mt-3">갤러리</Text>
+                  </Pressable>
+                  
+                  {/* 카메라 버튼 */}
+                  <Pressable
+                    onPress={takePhoto}
+                    className="bg-gray-100 rounded-xl items-center justify-center"
+                    style={{ width: 140, height: 140 }}
+                  >
+                    <Icon name="camera" width={48} height={48} color="#666" />
+                    <Text className="text-gray-700 text-sm font-medium mt-3">카메라</Text>
+                  </Pressable>
+                </View>
+              </View>
+            )}
+
+            {selectedImage && (
+              <View className="gap-2">
+                <Button
+                  onPress={handleUpload}
+                  disabled={isUploading}
+                  className="w-full"
+                >
+                  {isUploading ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <Text className="text-white font-semibold">업로드</Text>
+                  )}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onPress={handleClose}
+                  disabled={isUploading}
+                  className="w-full"
+                >
+                  <Text>취소</Text>
+                </Button>
+              </View>
+            )}
+          </View>
         </View>
       </BottomSheetView>
     </BottomSheetModal>
