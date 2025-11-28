@@ -11,6 +11,8 @@ import MapModal from '@/components/cafeteria/MapModal';
 interface SearchScreenProps {
   children?: React.ReactNode;
   onFilterPress?: () => void;
+  isFilterApplied?: boolean;
+  filterResultCount?: number;
 }
 
 // 검색 결과 아이템 컴포넌트
@@ -83,7 +85,7 @@ function SearchResultCard({ item }: { item: SearchResultItem }) {
   return null;
 }
 
-export default function SearchScreen({ children, onFilterPress }: SearchScreenProps) {
+export default function SearchScreen({ children, onFilterPress, isFilterApplied, filterResultCount }: SearchScreenProps) {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [scrollY] = useState(new Animated.Value(0));
   const [searchText, setSearchText] = useState('');
@@ -195,7 +197,7 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
             onPress={onFilterPress ?? (() => navigation.navigate('Filter'))}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Icon name="filter" />
+            <Icon name={isFilterApplied ? "filterSelected" : "filter"} />
           </Pressable>
         </View>
       </Animated.View>
@@ -254,7 +256,16 @@ export default function SearchScreen({ children, onFilterPress }: SearchScreenPr
         </View>
       ) : (
         // 검색 모드가 아닐 때 기존 children 표시
-        children
+        <>
+          {isFilterApplied && filterResultCount !== undefined && (
+            <View className="px-4 py-3 bg-gray-50">
+              <Text className="text-sm text-gray-600">
+                필터 적용 결과 {filterResultCount}개
+              </Text>
+            </View>
+          )}
+          {children}
+        </>
       )}
     </Animated.ScrollView>
 

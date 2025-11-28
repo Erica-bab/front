@@ -1,7 +1,8 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Dropdown } from '@/components/filter/Dropdown';
 import { OptionBtn } from '@/components/filter/OptionButton';
@@ -32,6 +33,27 @@ export default function FilterScreen() {
   const [selectedAffiliates, setSelectedAffiliates] = useState<string[]>([]);
   const [selectedRestaurantTypes, setSelectedRestaurantTypes] = useState<string[]>([]);
 
+  // 저장된 필터 불러오기
+  useEffect(() => {
+    const loadSavedFilter = async () => {
+      try {
+        const savedFilter = await AsyncStorage.getItem('restaurantFilter');
+        if (savedFilter) {
+          const filter = JSON.parse(savedFilter);
+          setSelectedDay(filter.selectedDay);
+          setSelectedHour(filter.selectedHour);
+          setSelectedMin(filter.selectedMin);
+          setSelectedFoodTypes(filter.selectedFoodTypes || []);
+          setSelectedAffiliates(filter.selectedAffiliates || []);
+          setSelectedRestaurantTypes(filter.selectedRestaurantTypes || []);
+        }
+      } catch (error) {
+        console.error('Failed to load filter:', error);
+      }
+    };
+    loadSavedFilter();
+  }, []);
+
   const goBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
@@ -45,7 +67,22 @@ export default function FilterScreen() {
     setSelectedRestaurantTypes([]);
   };
 
-  const handleApply = () => {
+  const handleApply = async () => {
+    // 필터 저장
+    try {
+      const filterData = {
+        selectedDay,
+        selectedHour,
+        selectedMin,
+        selectedFoodTypes,
+        selectedAffiliates,
+        selectedRestaurantTypes,
+      };
+      await AsyncStorage.setItem('restaurantFilter', JSON.stringify(filterData));
+    } catch (error) {
+      console.error('Failed to save filter:', error);
+    }
+
     const params = filterToParams({
       dayOfWeek: selectedDay,
       hour: selectedHour,

@@ -13,6 +13,7 @@ import DownAngleIcon from '@/assets/icon/down_angle.svg';
 import DropdownIcon from '@/assets/icon/dropdown.svg';
 import EditIcon from '@/assets/icon/edit.svg';
 import FilterIcon from '@/assets/icon/filter.svg';
+import FilterSelectedIcon from '@/assets/icon/filter_selected.svg';
 import GoodIcon from '@/assets/icon/good.svg';
 import GoodFilledIcon from '@/assets/icon/good_filled.svg';
 import LeftAngleIcon from '@/assets/icon/left_angle.svg';
@@ -50,6 +51,7 @@ const icons = {
   dropdown: DropdownIcon,
   edit: EditIcon,
   filter: FilterIcon,
+  filterSelected: FilterSelectedIcon,
   good: GoodIcon,
   goodFilled: GoodFilledIcon,
   leftAngle: LeftAngleIcon,

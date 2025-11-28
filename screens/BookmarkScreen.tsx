@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useMyBookmarks, useToggleBookmark } from '@/api/user/useUserActivity';
 import { useAuth } from '@/api/auth/useAuth';
@@ -15,18 +15,33 @@ export default function BookmarkScreen() {
   // 403 에러 처리 (로그인 필요)
   const is403Error = error instanceof Error && (error as AxiosError)?.response?.status === 403;
 
-  const handleRemoveBookmark = async (restaurantId: number) => {
-    toggleBookmark(restaurantId, {
-      onSuccess: () => {
-        refetch();
-      },
-      onError: (err) => {
-        if ((err as AxiosError)?.response?.status === 403) {
-          (navigation.navigate as any)('Login');
-        }
-        console.error('Failed to remove bookmark:', err);
-      },
-    });
+  const handleRemoveBookmark = async (restaurantId: number, restaurantName: string) => {
+    Alert.alert(
+      '북마크 삭제',
+      `${restaurantName}을(를) 북마크에서 삭제하시겠습니까?`,
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '예',
+          onPress: () => {
+            toggleBookmark(restaurantId, {
+              onSuccess: () => {
+                refetch();
+              },
+              onError: (err) => {
+                if ((err as AxiosError)?.response?.status === 403) {
+                  (navigation.navigate as any)('Login');
+                }
+                console.error('Failed to remove bookmark:', err);
+              },
+            });
+          },
+        },
+      ]
+    );
   };
 
   const handleRestaurantPress = (restaurantId: number) => {
@@ -102,7 +117,7 @@ export default function BookmarkScreen() {
                 </View>
 
                 <Pressable
-                  onPress={() => handleRemoveBookmark(item.restaurant_id)}
+                  onPress={() => handleRemoveBookmark(item.restaurant_id, item.restaurant_name || '알 수 없는 식당')}
                   className="ml-2 p-2"
                 >
                   <Icon name="bookmark" width={24} height={24} color="#3B82F6" />
