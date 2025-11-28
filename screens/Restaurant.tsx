@@ -7,9 +7,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SearchBar from '@/components/SearchBar';
 import AdBanner from '@/components/ui/AdBanner';
 import RestaurantCard from '@/components/restaurant/RestaurantCard';
+import ImageUploadModal from '@/components/restaurant/ImageUploadModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRestaurantList } from '@/api/restaurants/useRestaurant';
 import { RestaurantListParams } from '@/api/restaurants/types';
+import { useAuth } from '@/api/auth/useAuth';
 import Icon from '@/components/Icon';
 
 const SORT_OPTIONS = ['위치순', '별점순', '가격순'];
@@ -21,10 +23,13 @@ const SORT_MAP: Record<string, 'distance' | 'rating' | 'price'> = {
 
 export default function RestuarantScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
+    const { refreshAuthState } = useAuth();
     const [filterParams, setFilterParams] = useState<RestaurantListParams>({});
     const [sortOption, setSortOption] = useState<string>('위치순');
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [selectedRestaurantId, setSelectedRestaurantId] = useState<string | null>(null);
+    const [showImageUploadModal, setShowImageUploadModal] = useState(false);
     const { data, isLoading, error } = useRestaurantList(filterParams);
 
     const requestLocationAndUpdate = async () => {
@@ -188,9 +193,33 @@ export default function RestuarantScreen() {
                         restaurantId={restaurant.id.toString()}
                         thumbnailUrls={restaurant.thumbnail_urls}
                         comment={restaurant.popular_comment?.content}
+                        onAddPhotoPress={(restaurantId) => {
+                            setSelectedRestaurantId(restaurantId);
+                            setShowImageUploadModal(true);
+                        }}
                     />
                 ))}
             </SearchBar>
+
+            {/* 사진 추가 모달 - 최상위 레벨에서 렌더링 */}
+            {selectedRestaurantId && (
+                <ImageUploadModal
+                    restaurantId={Number(selectedRestaurantId)}
+                    visible={showImageUploadModal}
+                    onClose={() => {
+                        setShowImageUploadModal(false);
+                        setSelectedRestaurantId(null);
+                    }}
+                    onSuccess={() => {
+                        // 이미지 목록이 자동으로 갱신됨 (React Query 캐시 무효화)
+                    }}
+                    onShowLogin={() => {
+                        setShowImageUploadModal(false);
+                        setSelectedRestaurantId(null);
+                        (navigation.navigate as any)('Login', { onSuccess: refreshAuthState });
+                    }}
+                />
+            )}
         </SafeAreaView>
     );
 }

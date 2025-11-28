@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import * as Linking from 'expo-linking';
 
 import CafeteriaScreen from './screens/CafeteriaScreen';
@@ -96,65 +97,67 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <NavigationContainer linking={linking}>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="Main" component={TabNavigator} />
-              <Stack.Screen
-                name="Filter"
-                component={FilterScreen}
-                options={{
-                  headerShown: false,
-                  presentation: 'transparentModal',
-                  animation: 'slide_from_bottom',
-                }}
-              />
-              <Stack.Screen
-                name="Login"
-                component={LoginScreen}
-                options={{
-                  headerShown: false,
-                  presentation: 'transparentModal',
-                  animation: 'slide_from_bottom',
-                }}
-              />
-              <Stack.Screen
-                name="RestaurantDetail"
-                component={RestaurantDetailScreen}
-                options={{
-                  headerShown: false,
-                }}
-              />
-              <Stack.Screen
-                name="CommentDetail"
-                component={CommentDetailScreen}
-                options={{
-                  headerShown: false,
-                }}
-              />
-              <Stack.Screen
-                name="Bookmark"
-                component={BookmarkScreen}
-                options={{
-                  headerShown: true,
-                  headerTitle: '북마크',
-                  headerStyle: { backgroundColor: '#3B82F6' },
-                  headerTintColor: '#FFFFFF',
-                  headerTitleStyle: { fontWeight: 'bold' },
-                }}
-              />
-              <Stack.Screen
-                name="AddInfo"
-                component={AddInfoScreen}
-                options={{
-                  headerShown: true,
-                  headerTitle: '정보 입력',
-                  headerStyle: { backgroundColor: '#3B82F6' },
-                  headerTintColor: '#FFFFFF',
-                  headerTitleStyle: { fontWeight: 'bold' },
-                }}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
+          <BottomSheetModalProvider>
+            <NavigationContainer linking={linking}>
+              <Stack.Navigator screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Main" component={TabNavigator} />
+                <Stack.Screen
+                  name="Filter"
+                  component={FilterScreen}
+                  options={{
+                    headerShown: false,
+                    presentation: 'transparentModal',
+                    animation: 'slide_from_bottom',
+                  }}
+                />
+                <Stack.Screen
+                  name="Login"
+                  component={LoginScreen}
+                  options={{
+                    headerShown: false,
+                    presentation: 'transparentModal',
+                    animation: 'slide_from_bottom',
+                  }}
+                />
+                <Stack.Screen
+                  name="RestaurantDetail"
+                  component={RestaurantDetailScreen}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="CommentDetail"
+                  component={CommentDetailScreen}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Bookmark"
+                  component={BookmarkScreen}
+                  options={{
+                    headerShown: true,
+                    headerTitle: '북마크',
+                    headerStyle: { backgroundColor: '#3B82F6' },
+                    headerTintColor: '#FFFFFF',
+                    headerTitleStyle: { fontWeight: 'bold' },
+                  }}
+                />
+                <Stack.Screen
+                  name="AddInfo"
+                  component={AddInfoScreen}
+                  options={{
+                    headerShown: true,
+                    headerTitle: '정보 입력',
+                    headerStyle: { backgroundColor: '#3B82F6' },
+                    headerTintColor: '#FFFFFF',
+                    headerTitleStyle: { fontWeight: 'bold' },
+                  }}
+                />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </BottomSheetModalProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

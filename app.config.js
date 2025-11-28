@@ -6,7 +6,7 @@ export default {
     scheme: ["efoo", "com.googleusercontent.apps.1041029378289-puugfhcoucnpvmi8bk8k2a5uapiaak38"],
     extra: {
       "eas": {
-        "projectId": "bbf9506d-af02-4c2e-98df-81034e95805b"
+        "projectId": "412b9e21-ad5e-4226-b19f-ec89449204ca"
       }
     },
     orientation: "portrait",
@@ -16,7 +16,7 @@ export default {
     splash: {
       image: "./assets/app/adaptive-icon.png",
       resizeMode: "contain",
-      backgroundColor: "#3072F0"
+      backgroundColor: "#2563EB"
     },
     ios: {
       supportsTablet: true,
@@ -26,6 +26,8 @@ export default {
       displayName: "에푸",
       infoPlist: {
         NSLocationWhenInUseUsageDescription: "주변 맛집을 위치순으로 정렬하기 위해 위치 정보가 필요합니다.",
+        NSPhotoLibraryUsageDescription: "식당 사진을 추가하기 위해 갤러리 접근 권한이 필요합니다.",
+        NSCameraUsageDescription: "식당 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
         CFBundleDisplayName: "에푸"
       },
       config: {
@@ -64,6 +66,13 @@ export default {
         "expo-location",
         {
           locationWhenInUsePermission: "주변 맛집을 위치순으로 정렬하기 위해 위치 정보가 필요합니다."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          photosPermission: "식당 사진을 추가하기 위해 갤러리 접근 권한이 필요합니다.",
+          cameraPermission: "식당 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다."
         }
       ]
     ]

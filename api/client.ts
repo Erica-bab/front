@@ -35,11 +35,37 @@ apiClient.interceptors.request.use(
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
 
+        // FormData인 경우 특별 처리
+        if (config.data instanceof FormData) {
+            // React Native에서는 Content-Type을 명시적으로 설정하지 않아야 함
+            // XMLHttpRequest가 자동으로 multipart/form-data와 boundary를 설정함
+            // 모든 Content-Type 관련 헤더 제거
+            if (config.headers) {
+                delete config.headers['Content-Type'];
+                delete config.headers['content-type'];
+                delete config.headers['Content-type'];
+            }
+            
+            // transformRequest를 설정하여 FormData를 그대로 전달
+            // axios의 기본 transformRequest를 덮어씀
+            config.transformRequest = [(data: any, headers: any) => {
+                // 헤더에서 Content-Type 완전히 제거
+                if (headers) {
+                    delete headers['Content-Type'];
+                    delete headers['content-type'];
+                    delete headers['Content-type'];
+                }
+                // FormData는 그대로 반환
+                return data;
+            }];
+        }
+
         // 디버깅: 요청 로그
         console.log('API Request:', {
             url: config.url,
             method: config.method,
-            data: config.data,
+            data: config.data instanceof FormData ? '[FormData]' : config.data,
+            headers: config.headers,
         });
 
         return config;
