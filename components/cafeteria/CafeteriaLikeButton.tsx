@@ -2,7 +2,6 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from '@/components/Icon';
 import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
 
 import { CafeteriaLikeParams } from '@/api/cafeteria/types';
 import { useCafeteriaLike, useToggleCafeteriaLike } from '@/api/cafeteria/useCafeteria';
@@ -11,7 +10,6 @@ import { useAuth } from '@/api/auth/useAuth';
 interface CafeteriaLikeProps {
   like: number;
   meal_id: number;
-  auth?: boolean;          // 지금은 안 쓰고 있음
   onShowLogin?: () => void;
 }
 
@@ -21,26 +19,26 @@ export default function CafeteriaLikeButton({
   onShowLogin,
 }: CafeteriaLikeProps) {
   const queryClient = useQueryClient();
-
   const { mutate: toggleLike, isPending } = useToggleCafeteriaLike();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
   const cafeteriaLikeParams: CafeteriaLikeParams = { meal_id };
 
+  // 로그인한 경우에만 좋아요 상태 조회
   const { data, isLoading: isDataLoading } = useCafeteriaLike(cafeteriaLikeParams);
-  const [isInitialized, setIsInitialized] = useState(false);
 
+  // 로그인 상태와 서버 데이터에 따라 좋아요 상태 결정
+  // 로그인 안됨 또는 데이터 없음 = 좋아요 안한 상태
+  const isLiked = isAuthenticated && !!data && data.user_reaction === 'like';
 
-  const isLiked =
-    !!isAuthenticated && data?.user_reaction === 'like';
-
-  const likeCount =
-    typeof data?.like_count === 'number'
-      ? data.like_count
-      : like;
+  // 좋아요 수: 로그인했고 서버 데이터가 있으면 서버 값, 아니면 props 초기값
+  const likeCount = isAuthenticated && typeof data?.like_count === 'number'
+    ? data.like_count
+    : like;
 
   const handlePress = () => {
-    if (!isAuthenticated && !isAuthLoading) {
+    // 로그인 안되어 있으면 로그인 창만 띄우고 아무것도 안함
+    if (!isAuthLoading && !isAuthenticated) {
       onShowLogin?.();
       return;
     }
@@ -50,15 +48,13 @@ export default function CafeteriaLikeButton({
     toggleLike(
       { meal_id },
       {
-        onSuccess: (res) => {
-          console.log('toggleLike API response:', res);
-
+        onSuccess: () => {
           queryClient.invalidateQueries({
             queryKey: ['cafeteriaLike', meal_id],
           });
         },
         onError: (err) => {
-          console.log('toggle like error', err?.response?.data);
+          console.error('toggle like error', err?.response?.data);
           if (err?.response?.status === 403) {
             onShowLogin?.();
           }

@@ -138,11 +138,15 @@ export const useLogout = () => {
       // 토큰 삭제 및 캐시 초기화
       await AsyncStorage.multiRemove(['accessToken', 'refreshToken']);
       queryClient.clear();
+      // 모든 useAuth 훅에 알림
+      notifyAuthStateChange();
     },
     onError: async () => {
       // 에러가 발생해도 로컬 토큰은 삭제
       await AsyncStorage.multiRemove(['accessToken', 'refreshToken']);
       queryClient.clear();
+      // 모든 useAuth 훅에 알림
+      notifyAuthStateChange();
     },
   });
 };

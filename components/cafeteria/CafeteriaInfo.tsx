@@ -49,7 +49,6 @@ export default function CafeteriaInfo({
         <CafeteriaLikeButton
           like={like}
           meal_id={meal_id}
-          auth={auth}
           onShowLogin={onShowLogin}
         />
       </View>
