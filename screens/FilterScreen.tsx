@@ -25,6 +25,7 @@ export default function FilterScreen() {
   const { onApply } = route.params as { onApply?: (params: RestaurantListParams) => void } || {};
 
   const snapPoints = useMemo(() => ['85%', '95%'], []);
+  const [operatingTimeMode, setOperatingTimeMode] = useState<'none' | 'operating' | 'manual'>('none');
   const [selectedDay, setSelectedDay] = useState<string>();
   const [selectedHour, setSelectedHour] = useState<string>();
   const [selectedMin, setSelectedMin] = useState<string>();
@@ -33,6 +34,25 @@ export default function FilterScreen() {
   const [selectedAffiliates, setSelectedAffiliates] = useState<string[]>([]);
   const [selectedRestaurantTypes, setSelectedRestaurantTypes] = useState<string[]>([]);
 
+  // 현재 시간을 가져와서 요일, 시간, 분으로 변환하는 함수
+  const getCurrentTime = useCallback(() => {
+    const now = new Date();
+    const dayIndex = now.getDay(); // 0(일요일) ~ 6(토요일)
+    const hour = now.getHours().toString().padStart(2, '0');
+    const minute = now.getMinutes();
+    // 30분 단위로 반올림 (0-29분 -> 00, 30-59분 -> 30)
+    const roundedMinute = minute < 30 ? '00' : '30';
+    
+    // dayIndex를 DAYS 배열 인덱스로 변환 (일요일=0 -> 일요일=6, 월요일=1 -> 월요일=0)
+    const dayName = DAYS[dayIndex === 0 ? 6 : dayIndex - 1];
+    
+    return {
+      day: dayName,
+      hour,
+      minute: roundedMinute,
+    };
+  }, []);
+
   // 저장된 필터 불러오기
   useEffect(() => {
     const loadSavedFilter = async () => {
@@ -40,6 +60,7 @@ export default function FilterScreen() {
         const savedFilter = await AsyncStorage.getItem('restaurantFilter');
         if (savedFilter) {
           const filter = JSON.parse(savedFilter);
+          setOperatingTimeMode(filter.operatingTimeMode || 'none');
           setSelectedDay(filter.selectedDay);
           setSelectedHour(filter.selectedHour);
           setSelectedMin(filter.selectedMin);
@@ -54,11 +75,22 @@ export default function FilterScreen() {
     loadSavedFilter();
   }, []);
 
+  // 시간 선택 시 분 드롭다운 활성화
+  useEffect(() => {
+    if (selectedHour && operatingTimeMode === 'manual') {
+      // 시간이 선택되면 분도 초기화하지 않고 유지
+    } else if (!selectedHour && operatingTimeMode === 'manual') {
+      // 시간이 없으면 분도 초기화
+      setSelectedMin(undefined);
+    }
+  }, [selectedHour, operatingTimeMode]);
+
   const goBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
   const handleReset = () => {
+    setOperatingTimeMode('none');
     setSelectedDay(undefined);
     setSelectedHour(undefined);
     setSelectedMin(undefined);
@@ -67,13 +99,43 @@ export default function FilterScreen() {
     setSelectedRestaurantTypes([]);
   };
 
+  // 운영중 버튼 클릭 시 현재 시간으로 설정
+  const handleOperatingNow = () => {
+    const currentTime = getCurrentTime();
+    setOperatingTimeMode('operating');
+    setSelectedDay(currentTime.day);
+    setSelectedHour(currentTime.hour);
+    setSelectedMin(currentTime.minute);
+  };
+
+  // 운영시간 수동선택 버튼 클릭 시
+  const handleManualSelect = () => {
+    setOperatingTimeMode('manual');
+    setSelectedDay(undefined);
+    setSelectedHour(undefined);
+    setSelectedMin(undefined);
+  };
+
   const handleApply = async () => {
+    // 운영중 모드인 경우 현재 시간으로 업데이트
+    let finalDay = selectedDay;
+    let finalHour = selectedHour;
+    let finalMin = selectedMin;
+    
+    if (operatingTimeMode === 'operating') {
+      const currentTime = getCurrentTime();
+      finalDay = currentTime.day;
+      finalHour = currentTime.hour;
+      finalMin = currentTime.minute;
+    }
+
     // 필터 저장
     try {
       const filterData = {
-        selectedDay,
-        selectedHour,
-        selectedMin,
+        operatingTimeMode,
+        selectedDay: finalDay,
+        selectedHour: finalHour,
+        selectedMin: finalMin,
         selectedFoodTypes,
         selectedAffiliates,
         selectedRestaurantTypes,
@@ -84,9 +146,9 @@ export default function FilterScreen() {
     }
 
     const params = filterToParams({
-      dayOfWeek: selectedDay,
-      hour: selectedHour,
-      minute: selectedMin,
+      dayOfWeek: finalDay,
+      hour: finalHour,
+      minute: finalMin,
       categories: selectedFoodTypes,
       affiliations: selectedAffiliates,
       subCategory: selectedRestaurantTypes[0],
@@ -120,35 +182,65 @@ export default function FilterScreen() {
           showsVerticalScrollIndicator={false}
         >
             <Text className="pt-4 text-xl font-bold mb-4">운영시간</Text>
-            <View className='flex-row gap-2 flex-wrap'>
-              <Dropdown
-                label="요일"
-                options={DAYS}
-                selectedValue={selectedDay}
-                onSelect={setSelectedDay}
-                placeholder="요일"
-                isOpen={activeDropdown === 'day'}
-                onToggle={() => setActiveDropdown(activeDropdown === 'day' ? null : 'day')}
+            
+            {/* 운영시간 모드 선택 버튼 */}
+            <View className='flex-row gap-2 mb-4'>
+              <OptionBtn
+                text="운영중"
+                isSelected={operatingTimeMode === 'operating'}
+                onPress={handleOperatingNow}
               />
-              <Dropdown
-                label="시간"
-                options={HOUR}
-                selectedValue={selectedHour?selectedHour+"시":selectedHour}
-                onSelect={setSelectedHour}
-                placeholder="시간"
-                isOpen={activeDropdown === 'hour'}
-                onToggle={() => setActiveDropdown(activeDropdown === 'hour' ? null : 'hour')}
-              />
-              <Dropdown
-                label="분"
-                options={MIN}
-                selectedValue={selectedMin?selectedMin+"분":selectedMin}
-                onSelect={setSelectedMin}
-                placeholder="분"
-                isOpen={activeDropdown === 'min'}
-                onToggle={() => setActiveDropdown(activeDropdown === 'min' ? null : 'min')}
+              <OptionBtn
+                text="운영시간 수동선택"
+                isSelected={operatingTimeMode === 'manual'}
+                onPress={handleManualSelect}
               />
             </View>
+
+            {/* 운영중 모드일 때 선택된 시간 표시 */}
+            {operatingTimeMode === 'operating' && selectedDay && selectedHour && selectedMin && (
+              <View className='mb-4 p-3 bg-blue-50 rounded-lg'>
+                <Text className='text-sm text-blue-700'>
+                  현재 운영중인 식당만 표시됩니다 ({selectedDay} {selectedHour}시 {selectedMin}분 기준)
+                </Text>
+              </View>
+            )}
+
+            {/* 수동선택 모드일 때만 요일/시간/분 선택 UI 표시 */}
+            {operatingTimeMode === 'manual' && (
+              <View className='flex-row gap-2 flex-wrap mb-4'>
+                <Dropdown
+                  label="요일"
+                  options={DAYS}
+                  selectedValue={selectedDay}
+                  onSelect={setSelectedDay}
+                  placeholder="요일"
+                  isOpen={activeDropdown === 'day'}
+                  onToggle={() => setActiveDropdown(activeDropdown === 'day' ? null : 'day')}
+                />
+                <Dropdown
+                  label="시간"
+                  options={HOUR}
+                  selectedValue={selectedHour ? selectedHour + "시" : selectedHour}
+                  onSelect={setSelectedHour}
+                  placeholder="시간"
+                  isOpen={activeDropdown === 'hour'}
+                  onToggle={() => setActiveDropdown(activeDropdown === 'hour' ? null : 'hour')}
+                />
+                {/* 시간이 선택되었을 때만 분 드롭다운 표시 */}
+                {selectedHour && (
+                  <Dropdown
+                    label="분"
+                    options={MIN}
+                    selectedValue={selectedMin ? selectedMin + "분" : selectedMin}
+                    onSelect={setSelectedMin}
+                    placeholder="분"
+                    isOpen={activeDropdown === 'min'}
+                    onToggle={() => setActiveDropdown(activeDropdown === 'min' ? null : 'min')}
+                  />
+                )}
+              </View>
+            )}
 
             <View className="h-px w-full bg-gray-100 my-4" />
             <Text className="text-xl font-bold mb-4">음식 종류</Text>
