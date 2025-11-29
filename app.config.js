@@ -6,7 +6,7 @@ export default {
     scheme: ["efoo", "com.googleusercontent.apps.1041029378289-puugfhcoucnpvmi8bk8k2a5uapiaak38"],
     extra: {
       "eas": {
-        "projectId": "412b9e21-ad5e-4226-b19f-ec89449204ca"
+        "projectId": "b0ac8133-210a-4ac9-8d22-eede5468405b"
       }
     },
     orientation: "portrait",
@@ -22,7 +22,7 @@ export default {
       supportsTablet: false,
       UIDeviceFamily: [1],
       bundleIdentifier: "com.efoo.app",
-      buildNumber: "4",
+      buildNumber: "5",
       usesAppleSignIn: true,
       displayName: "에푸",
       infoPlist: {
@@ -42,6 +42,7 @@ export default {
         backgroundColor: "#3072F0"
       },
       label: "에푸",
+      versionCode: 2,
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       config: {
