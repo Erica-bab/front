@@ -9,6 +9,7 @@ interface RestaurantStatusTagProps {
     rating: number;
     restaurantId?: string;
     onRatingPress?: () => void;
+    onStatusPress?: () => void;
 }
 
 // operating_status type에 따른 표시 텍스트
@@ -64,7 +65,7 @@ function formatTime(isoString: string | null): string {
     return `${hours}:${minutes}`;
 }
 
-export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRatingPress }: RestaurantStatusTagProps) {
+export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRatingPress, onStatusPress }: RestaurantStatusTagProps) {
     // operating_status가 없으면 기본값 사용
     if (!operatingStatus) {
         return (
@@ -96,11 +97,13 @@ export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRat
         <View className="flex-col" style={{ gap: 4 }}>
             <View className="flex-row items-center" style={{ gap: 8 }}>
                 {/* 영업 상태 태그 */}
-                <Tag className={styles.filled}>
-                    <Text className="text-white text-sm font-medium">
-                        {statusLabel}
-                    </Text>
-                </Tag>
+                <Pressable onPress={onStatusPress}>
+                    <Tag className={styles.filled}>
+                        <Text className="text-white text-sm font-medium">
+                            {statusLabel}
+                        </Text>
+                    </Tag>
+                </Pressable>
 
                 {/* 별점 태그 */}
                 <Pressable onPress={onRatingPress}>
