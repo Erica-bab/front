@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { RestaurantDetailResponse, BusinessHoursDay } from '@/api/restaurants/types';
 import Icon from '@/components/Icon';
+import { formatDistance } from '@/utils/formatDistance';
 
 interface RestaurantHomeTabProps {
   restaurant: RestaurantDetailResponse;
@@ -82,13 +83,20 @@ export default function RestaurantHomeTab({ restaurant }: RestaurantHomeTabProps
 
   return (
     <View className="p-4 gap-2">
-      <View className='flex-row gap-4 mb-4 items-center'>
-        <Icon name='location' color="rgba(107, 114, 128, 1)"/>
-        <Text>{restaurant.location.address}</Text>
+      <View className='flex-row gap-4 mb-4 items-center justify-between'>
+        <View className='flex-row gap-4 items-center flex-1'>
+          <Icon width={20} name='location' color="rgba(107, 114, 128, 1)"/>
+          <Text className="flex-1">{restaurant.location.address}</Text>
+        </View>
+        {restaurant.location.distance !== null && restaurant.location.distance !== undefined && (
+          <Text className="text-sm text-gray-500">
+            {formatDistance(restaurant.location.distance)}
+          </Text>
+        )}
       </View>
-      <View className='flex-row gap-4 mb-4'>
+      <View className='flex-row gap-4 mb-4 items-center'>
         <Icon width={20} name='clock' color="rgba(107, 114, 128, 1)"/>
-        <View>
+        <View className="flex-1">
           <Pressable
             className='flex-row items-center gap-1'
             onPress={() => setIsHoursExpanded(!isHoursExpanded)}
@@ -123,13 +131,13 @@ export default function RestaurantHomeTab({ restaurant }: RestaurantHomeTabProps
       </View>
       {restaurant.phone && (
         <View className='flex-row gap-4 mb-4 items-center'>
-          <Icon width={20} name='telephone'/>
+          <Icon width={20} name='telephone' color="rgba(107, 114, 128, 1)"/>
           <Text>{restaurant.phone}</Text>
         </View>
       )}
       {restaurant.affiliations && restaurant.affiliations.length > 0 && (
         <View className='flex-row gap-4 mb-4 items-center'>
-          <Icon name='pin'/>
+          <Icon width={20} name='pin' color="rgba(107, 114, 128, 1)"/>
           <Text>제휴 · {restaurant.affiliations.map(a => a.college_name).join(' · ')}</Text>
         </View>
       )}

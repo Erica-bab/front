@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RestaurantOperatingStatus } from '@/api/restaurants/types';
 import { useRestaurantImages } from '@/api/restaurants/useRestaurantImage';
+import { formatDistance } from '@/utils/formatDistance';
 
 interface RestaurantCardProps {
   name: string;
@@ -15,9 +16,10 @@ interface RestaurantCardProps {
   comment?: string;
   restaurantId?: string;
   thumbnailUrls?: string[];
+  distance?: number | null;
 }
 
-export default function RestaurantCard({ name, category, operatingStatus, rating, comment, restaurantId, thumbnailUrls }: RestaurantCardProps) {
+export default function RestaurantCard({ name, category, operatingStatus, rating, comment, restaurantId, thumbnailUrls, distance }: RestaurantCardProps) {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const displayComment = comment || null;
   
@@ -56,15 +58,33 @@ export default function RestaurantCard({ name, category, operatingStatus, rating
     }
   };
 
+  const handleCardPress = () => {
+    navigation.navigate('RestaurantDetail', { restaurantId });
+  };
+
   return (
     <Card className='bg-white border border-gray-100'>
-      <View className="flex-row items-center">
-        <Text className="text-lg text-blue-500">{name}</Text>
-        <Text className="ml-1">{category}</Text>
-      </View>
-      <RestaurantStatusTag operatingStatus={operatingStatus} rating={rating} onRatingPress={handleRatingPress} />
+      {/* 식당 이름과 카테고리 영역 - 자세히보기로 이동 */}
+      <Pressable onPress={handleCardPress}>
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <Text className="text-lg text-blue-500">{name}</Text>
+            <Text className="ml-1">{category}</Text>
+          </View>
+          {distance !== null && distance !== undefined && (
+            <Text className="text-sm text-gray-500">
+              {formatDistance(distance)}
+            </Text>
+          )}
+        </View>
+      </Pressable>
       
-      {/* 썸네일 표시 */}
+      {/* 상태 태그 영역 - 자세히보기로 이동 */}
+      <Pressable onPress={handleCardPress}>
+        <RestaurantStatusTag operatingStatus={operatingStatus} rating={rating} onRatingPress={handleRatingPress} />
+      </Pressable>
+      
+      {/* 썸네일 표시 - 이미지 영역만 사진 탭으로 이동 */}
       <Pressable
         onPress={() => navigation.navigate('RestaurantDetail', { restaurantId, initialTab: 'photos' })}
       >
@@ -106,7 +126,7 @@ export default function RestaurantCard({ name, category, operatingStatus, rating
         </Pressable>
       )}
       <Pressable
-        onPress={() => navigation.navigate('RestaurantDetail', { restaurantId })}
+        onPress={handleCardPress}
         className='w-full justify-center items-center bg-blue-500 p-1 rounded-lg'
       >
         <Text className='text-white font-bold p-1'>자세히보기</Text>
