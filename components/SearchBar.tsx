@@ -23,6 +23,18 @@ function SearchResultCard({ item }: { item: SearchResultItem }) {
 
   if (item.type === 'restaurant' && item.restaurant) {
     const restaurant = item.restaurant;
+    
+    // 운영 상태 레이블
+    const statusLabels = {
+      open: '영업중',
+      break_time: '브레이크타임',
+      order_end: '주문마감',
+      closed: '영업종료',
+    };
+    const statusText = restaurant.operating_status 
+      ? statusLabels[restaurant.operating_status.current.type] 
+      : null;
+
     return (
       <Pressable
         className="p-4 border-b border-gray-100 bg-white"
@@ -38,18 +50,21 @@ function SearchResultCard({ item }: { item: SearchResultItem }) {
               {restaurant.location.address}
             </Text>
             <View className="flex-row items-center gap-2 mt-1">
+              {statusText && (
+                <Text className="text-sm text-gray-600">{statusText}</Text>
+              )}
               <Text className="text-sm text-blue-500">
                 ★ {restaurant.average_rating.toFixed(1)}
               </Text>
               <Text className="text-sm text-gray-400">
                 ({restaurant.rating_count})
               </Text>
-              {restaurant.average_price && (
-                <Text className="text-sm text-gray-500">
-                  평균 {Math.round(restaurant.average_price).toLocaleString()}원
-                </Text>
-              )}
             </View>
+            {restaurant.average_price && (
+              <Text className="text-sm text-gray-500 mt-1">
+                평균 {Math.round(restaurant.average_price).toLocaleString()}원
+              </Text>
+            )}
           </View>
           <Icon name="rightAngle" size={16} color="#9CA3AF" />
         </View>
@@ -58,10 +73,23 @@ function SearchResultCard({ item }: { item: SearchResultItem }) {
   }
 
   if (item.type === 'menu' && item.menu && item.restaurant) {
+    const restaurant = item.restaurant;
+    
+    // 운영 상태 레이블
+    const statusLabels = {
+      open: '영업중',
+      break_time: '브레이크타임',
+      order_end: '주문마감',
+      closed: '영업종료',
+    };
+    const statusText = restaurant.operating_status 
+      ? statusLabels[restaurant.operating_status.current.type] 
+      : null;
+
     return (
       <Pressable
         className="p-4 border-b border-gray-100 bg-white"
-        onPress={() => navigation.navigate('RestaurantDetail', { restaurantId: item.restaurant!.id })}
+        onPress={() => navigation.navigate('RestaurantDetail', { restaurantId: restaurant.id })}
       >
         <View className="flex-row items-center">
           <View className="flex-1">
@@ -70,13 +98,24 @@ function SearchResultCard({ item }: { item: SearchResultItem }) {
               <Text className="text-base font-semibold">{item.menu.name}</Text>
             </View>
             <Text className="text-sm text-gray-500 mt-1">
-              {item.restaurant.name}
+              {restaurant.name}
             </Text>
             {item.menu.price && (
               <Text className="text-sm text-gray-600 mt-1">
                 {item.menu.price.toLocaleString()}원
               </Text>
             )}
+            <View className="flex-row items-center gap-2 mt-1">
+              {statusText && (
+                <Text className="text-sm text-gray-600">{statusText}</Text>
+              )}
+              <Text className="text-sm text-blue-500">
+                ★ {restaurant.average_rating.toFixed(1)}
+              </Text>
+              <Text className="text-sm text-gray-400">
+                ({restaurant.rating_count})
+              </Text>
+            </View>
           </View>
           <Icon name="rightAngle" size={16} color="#9CA3AF" />
         </View>

@@ -21,7 +21,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.efoo.app",
-      buildNumber: "7",
+      buildNumber: "9",
       usesAppleSignIn: true,
       displayName: "에푸",
       infoPlist: {

@@ -37,6 +37,22 @@ function formatTime(isoString: string | null): string {
   return `${hours}:${minutes}`;
 }
 
+// 오늘인지 확인하는 함수
+function isToday(date: Date): boolean {
+  const today = new Date();
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  );
+}
+
+// 요일 포맷 함수 (요일만 반환, 예: "월")
+function formatDayOfWeek(date: Date): string {
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
+  return days[date.getDay()];
+}
+
 function formatDayHours(hours: BusinessHoursDay | null | undefined): string[] {
   if (!hours) return [];
   if (hours.is_closed) return ['휴무일'];
@@ -80,7 +96,18 @@ export default function RestaurantHomeTab({ restaurant, distance }: RestaurantHo
   const nextAction = operatingStatus?.next;
   const nextActionTime = nextAction?.at ? formatTime(nextAction.at) : null;
   const nextActionLabel = nextAction?.type ? nextActionLabels[nextAction.type] : null;
-  const nextEventText = nextActionTime && nextActionLabel ? `${nextActionTime} ${nextActionLabel}` : null;
+  
+  // 다음 운영 시간 포맷 (오늘이 아니면 요일 추가)
+  let nextEventText = null;
+  if (nextActionTime && nextActionLabel && nextAction?.at) {
+    const nextActionDate = new Date(nextAction.at);
+    if (isToday(nextActionDate)) {
+      nextEventText = `${nextActionTime} ${nextActionLabel}예정`;
+    } else {
+      const dayOfWeek = formatDayOfWeek(nextActionDate);
+      nextEventText = `${dayOfWeek} ${nextActionTime} ${nextActionLabel}예정`;
+    }
+  }
 
   return (
     <View className="p-4 gap-2">
@@ -95,34 +122,45 @@ export default function RestaurantHomeTab({ restaurant, distance }: RestaurantHo
           </Text>
         )}
       </View>
-      <View className='flex-row gap-4 mb-4 items-center'>
+      <View className='flex-row gap-4 mb-4 items-start'>
         <Icon width={20} name='clock' color="rgba(107, 114, 128, 1)"/>
         <View className="flex-1">
           <Pressable
             className='flex-row items-center gap-1'
             onPress={() => setIsHoursExpanded(!isHoursExpanded)}
           >
-            <Text>{statusText}{nextEventText ? ` · ${nextEventText}예정` : ''}</Text>
+            <Text>{statusText}{nextEventText ? ` · ${nextEventText}` : ''}</Text>
             <Icon width={12} name={isHoursExpanded ? 'upAngle' : 'downAngle'} />
           </Pressable>
 
           {isHoursExpanded && (
-            <View className='mt-2 gap-2'>
+            <View className='mt-4 gap-5'>
               {dayOrder.map((day) => {
                 const hours = restaurant.business_hours[day];
                 const lines = formatDayHours(hours);
-                const isToday = day === today;
+                const isTodayDay = day === today;
 
                 return (
-                  <View key={day} className='gap-1'>
-                    <Text className={isToday ? 'font-bold' : ''}>{day}</Text>
-                    {lines.length > 0 ? (
-                      lines.map((line, idx) => (
-                        <Text key={idx} className={isToday ? 'text-gray-600 font-bold' : 'text-gray-600'}>{line}</Text>
-                      ))
-                    ) : (
-                      <Text className='text-gray-400 ml-2'>정보 없음</Text>
-                    )}
+                  <View key={day} className='flex-row items-start'>
+                    <View className='w-8'>
+                      <Text className={`text-sm font-semibold ${isTodayDay ? 'text-blue-600' : 'text-gray-700'}`}>
+                        {day}
+                      </Text>
+                    </View>
+                    <View className='flex-1 gap-1.5'>
+                      {lines.length > 0 ? (
+                        lines.map((line, idx) => (
+                          <Text 
+                            key={idx} 
+                            className={`text-sm ${isTodayDay ? 'text-blue-600 font-medium' : 'text-gray-600'}`}
+                          >
+                            {line}
+                          </Text>
+                        ))
+                      ) : (
+                        <Text className='text-gray-400 text-sm'>정보 없음</Text>
+                      )}
+                    </View>
                   </View>
                 );
               })}
