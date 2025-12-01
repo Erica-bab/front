@@ -162,17 +162,49 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
         });
 
         if (address) {
-          // 주소를 상세하게 표시 (| 구분자 제거)
-          const addressParts = [
-            address.region,
-            address.city,
-            address.district,
-            address.subregion,
-            address.street,
-            address.streetNumber
-          ].filter(Boolean);
+          // 주소를 상세하게 표시
+          let addressText = '';
           
-          let addressText = address.formattedAddress || addressParts.join(' ');
+          if (address.formattedAddress) {
+            // formattedAddress 사용 시 중복 단어 제거
+            const parts = address.formattedAddress.split(' ');
+            const uniqueParts: string[] = [];
+            const seen = new Set<string>();
+            
+            for (const part of parts) {
+              // 공백 제거 후 중복 체크
+              const trimmedPart = part.trim();
+              if (trimmedPart && !seen.has(trimmedPart)) {
+                seen.add(trimmedPart);
+                uniqueParts.push(trimmedPart);
+              }
+            }
+            
+            addressText = uniqueParts.join(' ');
+          } else {
+            // formattedAddress가 없으면 수동으로 조합 (중복 제거)
+            const addressParts = [
+              address.region,
+              address.city,
+              address.district,
+              address.subregion,
+              address.street,
+              address.streetNumber
+            ].filter(Boolean);
+            
+            // 중복 제거
+            const uniqueParts: string[] = [];
+            const seen = new Set<string>();
+            
+            for (const part of addressParts) {
+              if (part && !seen.has(part)) {
+                seen.add(part);
+                uniqueParts.push(part);
+              }
+            }
+            
+            addressText = uniqueParts.join(' ');
+          }
           
           // 30글자 넘어가면 ... 으로 잘라서 표시
           if (addressText.length > 30) {
@@ -306,20 +338,27 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
         <View className='w-full rounded-full flex-row justify-between items-center px-4 py-2 bg-gray-100'>
           <TextInput
             placeholder="찾아라! 에리카의 맛집"
-            className="flex-1 text-base p-1"
+            className="flex-1 text-base"
             placeholderTextColor="#9CA3AF"
             value={searchText}
             onChangeText={setSearchText}
             onSubmitEditing={handleSearch}
             returnKeyType="search"
-            style={{ lineHeight: 16 }}
+            style={{ lineHeight: 16, paddingVertical: 8, paddingHorizontal: 4 }}
+            editable={true}
           />
           {searchText.length > 0 ? (
-            <Pressable onPress={handleClearSearch}>
+            <Pressable 
+              onPress={handleClearSearch}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Icon name="cancel" size={15} color="#9CA3AF" />
             </Pressable>
           ) : (
-            <Pressable onPress={handleSearch}>
+            <Pressable 
+              onPress={handleSearch}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Icon name="search" width={35}/>
             </Pressable>
           )}
