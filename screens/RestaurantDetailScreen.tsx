@@ -111,7 +111,11 @@ export default function RestaurantDetailScreen() {
 
   // 수정 핸들러
   const handleEditPress = () => {
-    Alert.alert('알림', '준비중인 기능입니다.');
+    if (!isAuthenticated) {
+      (navigation.navigate as any)('Login', { onSuccess: refreshAuthState });
+      return;
+    }
+    navigation.navigate('RestaurantEdit', { restaurantId: Number(restaurantId) });
   };
 
   if (isLoading) {

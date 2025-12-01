@@ -12,6 +12,10 @@ import {
   SearchResponse,
   MenuListParams,
   MenuListResponse,
+  UpdateRestaurantRequest,
+  UpdateRestaurantHoursRequest,
+  CreateMenuRequest,
+  UpdateMenuRequest,
 } from './types';
 
 // 카테고리 매핑
@@ -189,5 +193,83 @@ export const useRestaurantMenus = (restaurantId: number, params?: MenuListParams
       return data;
     },
     enabled: !!restaurantId,
+  });
+};
+
+// 식당 전화번호 수정
+export const useUpdateRestaurant = (restaurantId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (request: UpdateRestaurantRequest) => {
+      const { data } = await apiClient.put<UpdateRestaurantResponse>(`/restaurants/${restaurantId}`, request);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+    },
+  });
+};
+
+// 식당 운영시간 수정
+export const useUpdateRestaurantHours = (restaurantId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (request: UpdateRestaurantHoursRequest) => {
+      const { data } = await apiClient.put<UpdateRestaurantHoursResponse>(`/restaurants/${restaurantId}/hours`, request);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+    },
+  });
+};
+
+// 메뉴 등록
+export const useCreateMenu = (restaurantId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (request: CreateMenuRequest) => {
+      const { data } = await apiClient.post<CreateMenuResponse>(`/restaurants/${restaurantId}/menus`, request);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId, 'menus'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+    },
+  });
+};
+
+// 메뉴 수정
+export const useUpdateMenu = (restaurantId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ menuId, request }: { menuId: number; request: UpdateMenuRequest }) => {
+      const { data } = await apiClient.put<UpdateMenuResponse>(`/restaurants/${restaurantId}/menus/${menuId}`, request);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId, 'menus'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+    },
+  });
+};
+
+// 메뉴 삭제
+export const useDeleteMenu = (restaurantId: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (menuId: number) => {
+      const { data } = await apiClient.delete<DeleteMenuResponse>(`/restaurants/${restaurantId}/menus/${menuId}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId, 'menus'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+    },
   });
 };
