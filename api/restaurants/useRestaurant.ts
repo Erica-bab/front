@@ -133,6 +133,63 @@ export const useRestaurantDetail = (restaurantId: number) => {
   });
 };
 
+// 운영 상태만 업데이트하는 함수 (캐시 최적화)
+export const useUpdateRestaurantOperatingStatus = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ restaurantId }: { restaurantId: number }) => {
+      // 운영 상태만 가져오는 엔드포인트가 있다면 사용, 없으면 전체 정보 가져오기
+      const { data } = await apiClient.get<RestaurantDetailResponse>(`/restaurants/${restaurantId}`);
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // 캐시된 데이터의 operating_status만 업데이트
+      queryClient.setQueryData<RestaurantDetailResponse>(
+        ['restaurant', variables.restaurantId],
+        (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            operating_status: data.operating_status,
+          };
+        }
+      );
+      
+      // 리스트 캐시도 업데이트
+      queryClient.setQueriesData<RestaurantListResponse>(
+        { queryKey: ['restaurants'] },
+        (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            restaurants: oldData.restaurants.map((restaurant) =>
+              restaurant.id === variables.restaurantId
+                ? { ...restaurant, operating_status: data.operating_status }
+                : restaurant
+            ),
+          };
+        }
+      );
+      
+      queryClient.setQueriesData<RestaurantListResponse>(
+        { queryKey: ['restaurants-v2'] },
+        (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            restaurants: oldData.restaurants.map((restaurant) =>
+              restaurant.id === variables.restaurantId
+                ? { ...restaurant, operating_status: data.operating_status }
+                : restaurant
+            ),
+          };
+        }
+      );
+    },
+  });
+};
+
 export const useRestaurantComments = (restaurantId: number, params?: CommentListParams) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId, 'comments', params],

@@ -18,9 +18,10 @@ interface RestaurantCardProps {
   restaurantId?: string;
   thumbnailUrls?: string[];
   distance?: number | null;
+  onStatusExpired?: () => void; // 상태가 만료되었을 때 호출되는 콜백
 }
 
-export default function RestaurantCard({ name, category, operatingStatus, rating, comment, restaurantId, thumbnailUrls, distance }: RestaurantCardProps) {
+export default function RestaurantCard({ name, category, operatingStatus, rating, comment, restaurantId, thumbnailUrls, distance, onStatusExpired }: RestaurantCardProps) {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const displayComment = comment || null;
   
@@ -93,6 +94,7 @@ export default function RestaurantCard({ name, category, operatingStatus, rating
           rating={rating} 
           onRatingPress={handleRatingPress}
           onStatusPress={handleStatusPress}
+          onStatusExpired={onStatusExpired}
         />
       </View>
       

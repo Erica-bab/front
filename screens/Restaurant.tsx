@@ -8,10 +8,11 @@ import SearchBar from '@/components/SearchBar';
 import AdBanner from '@/components/ui/AdBanner';
 import RestaurantCard from '@/components/restaurant/RestaurantCard';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRestaurantListV2 } from '@/api/restaurants/useRestaurant';
+import { useRestaurantListV2, useUpdateRestaurantOperatingStatus } from '@/api/restaurants/useRestaurant';
 import { RestaurantListParams } from '@/api/restaurants/types';
 import Icon from '@/components/Icon';
 import { calculateDistance } from '@/utils/calculateDistance';
+import { calculateOperatingStatus } from '@/utils/operatingStatus';
 
 const SORT_OPTIONS = ['위치순', '별점순', '가격순'];
 
@@ -22,6 +23,7 @@ export default function RestuarantScreen() {
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
     const { data, isLoading, error, refetch } = useRestaurantListV2(filterParams);
+    const { mutate: updateOperatingStatus } = useUpdateRestaurantOperatingStatus();
     const appState = useRef(AppState.currentState);
 
     const requestLocationAndUpdate = async () => {
@@ -261,13 +263,20 @@ export default function RestuarantScreen() {
                           )
                         : null;
 
+                    // 클라이언트에서 운영 상태 계산
+                    const operatingStatus = calculateOperatingStatus(restaurant.business_hours);
+
                     return (
                         <RestaurantCard
                             key={restaurant.id}
                             name={restaurant.name}
                             category={restaurant.category}
-                            operatingStatus={restaurant.operating_status}
+                            operatingStatus={operatingStatus}
                             rating={restaurant.average_rating}
+                            onStatusExpired={() => {
+                                // 운영 상태는 클라이언트에서 계산하므로 새로고침 불필요
+                                // 필요시 refetch() 호출
+                            }}
                             restaurantId={restaurant.id.toString()}
                             thumbnailUrls={restaurant.thumbnail_urls}
                             comment={restaurant.popular_comment?.content}

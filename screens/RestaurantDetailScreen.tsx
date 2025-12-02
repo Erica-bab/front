@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
-import { useRestaurantDetail } from '@/api/restaurants/useRestaurant';
+import { useRestaurantDetail, useUpdateRestaurantOperatingStatus } from '@/api/restaurants/useRestaurant';
 import { useCreateComment } from '@/api/restaurants/useReviewComment';
 import { useAuth } from '@/api/auth/useAuth';
 import { useCheckBookmark, useToggleBookmark, useMyComments, useMyReplies } from '@/api/user/useUserActivity';
@@ -21,6 +21,7 @@ import NaverMapWebView from '@/components/NaverMapWebView';
 import Icon from '@/components/Icon';
 import { useRestaurantImages } from '@/api/restaurants/useRestaurantImage';
 import { calculateDistance } from '@/utils/calculateDistance';
+import { calculateOperatingStatus } from '@/utils/operatingStatus';
 
 type RestaurantTabType = 'home' | 'menu' | 'comments' | 'photos';
 
@@ -34,7 +35,8 @@ export default function RestaurantDetailScreen() {
   const { isAuthenticated, isLoading: isAuthLoading, refreshAuthState } = useAuth();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-  const { data: restaurant, isLoading, error } = useRestaurantDetail(Number(restaurantId));
+  const { data: restaurant, isLoading, error, refetch: refetchRestaurant } = useRestaurantDetail(Number(restaurantId));
+  const { mutate: updateOperatingStatus } = useUpdateRestaurantOperatingStatus();
   const { mutate: createComment, isPending: isCommentLoading } = useCreateComment(Number(restaurantId));
   const { refetch: refetchRestaurantImages } = useRestaurantImages(restaurant?.id || 0);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
@@ -175,9 +177,13 @@ export default function RestaurantDetailScreen() {
             </View>
             <View className='ml-4 mb-4'>
               <RestaurantStatusTag
-                operatingStatus={restaurant.operating_status}
+                operatingStatus={calculateOperatingStatus(restaurant.business_hours)}
                 rating={restaurant.rating.average}
                 onRatingPress={() => setSelectedTab('comments')}
+                onStatusExpired={() => {
+                  // 운영 상태는 클라이언트에서 계산하므로 새로고침 불필요
+                  // 필요시 refetchRestaurant() 호출
+                }}
               />
             </View>
           </View>

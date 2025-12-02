@@ -11,6 +11,7 @@ interface RestaurantStatusTagProps {
     restaurantId?: string;
     onRatingPress?: () => void;
     onStatusPress?: () => void;
+    onStatusExpired?: () => void; // 상태가 만료되었을 때 호출되는 콜백
 }
 
 // operating_status type에 따른 표시 텍스트
@@ -99,16 +100,19 @@ function getDaysUntil(targetDate: Date): number {
     return Math.floor(diffMs / (1000 * 60 * 60 * 24));
 }
 
-// 다음 이벤트 텍스트 생성 함수
-function getNextEventText(operatingStatus: RestaurantOperatingStatus): string | null {
+// 다음 이벤트 텍스트 생성 함수 (현재 시간을 파라미터로 받음)
+function getNextEventText(operatingStatus: RestaurantOperatingStatus, currentTime: Date): string | null {
     const currentType = operatingStatus.current.type;
     const nextAction = operatingStatus.next;
     
     if (!nextAction?.at) return null;
     
     const nextDate = new Date(nextAction.at);
-    const minutesUntil = getMinutesUntil(nextDate);
+    const minutesUntil = Math.floor((nextDate.getTime() - currentTime.getTime()) / (1000 * 60));
     const daysUntil = getDaysUntil(nextDate);
+    
+    // 시간이 지나갔으면 null 반환 (상태가 업데이트되어야 함)
+    if (minutesUntil < 0) return null;
     
     // 운영중일 때: 30분 전부터 다음 이벤트 표시
     if (currentType === 'open') {
@@ -152,10 +156,13 @@ function getNextEventText(operatingStatus: RestaurantOperatingStatus): string | 
     return null;
 }
 
-export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRatingPress, onStatusPress }: RestaurantStatusTagProps) {
+export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRatingPress, onStatusPress, onStatusExpired }: RestaurantStatusTagProps) {
     const [showNextEvent, setShowNextEvent] = useState(false);
     const fadeAnim = useRef(new Animated.Value(1)).current;
     const showNextEventRef = useRef(false);
+    
+    // 현재 시간을 state로 관리하여 동적으로 업데이트
+    const [currentTime, setCurrentTime] = useState(new Date());
     
     // operating_status가 없으면 기본값 사용
     if (!operatingStatus) {
@@ -178,7 +185,34 @@ export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRat
     const currentType = operatingStatus.current.type;
     const styles = statusStyles[currentType];
     const statusLabel = statusLabels[currentType];
-    const nextEventText = getNextEventText(operatingStatus);
+    
+    // 현재 시간을 기준으로 동적으로 다음 이벤트 텍스트 계산
+    const nextEventText = getNextEventText(operatingStatus, currentTime);
+    
+    // 현재 시간을 주기적으로 업데이트 (1분마다)
+    useEffect(() => {
+        // 즉시 한 번 업데이트
+        setCurrentTime(new Date());
+        
+        // 1분마다 현재 시간 업데이트
+        const interval = setInterval(() => {
+            const now = new Date();
+            setCurrentTime(now);
+            
+            // 다음 이벤트 시간이 지났는지 확인
+            if (operatingStatus?.next?.at) {
+                const nextDate = new Date(operatingStatus.next.at);
+                const minutesUntil = Math.floor((nextDate.getTime() - now.getTime()) / (1000 * 60));
+                
+                // 시간이 지나갔으면 부모 컴포넌트에 알려서 데이터 새로고침
+                if (minutesUntil < 0 && onStatusExpired) {
+                    onStatusExpired();
+                }
+            }
+        }, 60000); // 1분마다
+        
+        return () => clearInterval(interval);
+    }, [operatingStatus, onStatusExpired]);
 
     // 운영시간 토글: 상태 레이블 3초, 다음 이벤트 5초
     useEffect(() => {
@@ -221,7 +255,7 @@ export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRat
                 // 다음 토글: 현재 상태에 따라 다른 지연 시간
                 // showNextEventRef.current가 true면 다음 이벤트 표시 중이므로 5초 후 상태 레이블로
                 // false면 상태 레이블 표시 중이므로 3초 후 다음 이벤트로
-                const nextDelay = showNextEventRef.current ? 5000 : 3000;
+                const nextDelay = showNextEventRef.current ? 3000 : 5000;
                 scheduleToggle(nextDelay);
             }, delay);
         };

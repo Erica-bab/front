@@ -3,6 +3,7 @@ import { View, Text, Pressable } from 'react-native';
 import { RestaurantDetailResponse, BusinessHoursDay } from '@/api/restaurants/types';
 import Icon from '@/components/Icon';
 import { formatDistance } from '@/utils/formatDistance';
+import { calculateOperatingStatus } from '@/utils/operatingStatus';
 
 interface RestaurantHomeTabProps {
   restaurant: RestaurantDetailResponse;
@@ -88,8 +89,8 @@ export default function RestaurantHomeTab({ restaurant, distance }: RestaurantHo
   const dayMap: DayKey[] = ['일', '월', '화', '수', '목', '금', '토'];
   const today = dayMap[new Date().getDay()];
 
-  // operating_status 사용
-  const operatingStatus = restaurant.operating_status;
+  // 클라이언트에서 운영 상태 계산
+  const operatingStatus = calculateOperatingStatus(restaurant.business_hours);
   const statusText = operatingStatus ? statusLabels[operatingStatus.current.type] : restaurant.status;
 
   // next 액션 텍스트

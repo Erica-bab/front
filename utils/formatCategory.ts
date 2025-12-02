@@ -2,8 +2,8 @@
  * 카테고리 문자열을 중간점(·)으로 구분된 형식으로 변환
  * 예: "패스트푸드중식" -> "패스트푸드 · 중식"
  */
-export function formatCategory(category: string): string {
-  if (!category) return '';
+export function formatCategory(category: string | null | undefined): string {
+  if (!category || typeof category !== 'string') return '';
   
   // 알려진 카테고리 목록 (우선순위 순서대로)
   const categories = [
@@ -20,11 +20,11 @@ export function formatCategory(category: string): string {
   ];
   
   const foundCategories: string[] = [];
-  let remaining = category;
+  let remaining: string = String(category);
   
   // 각 카테고리를 순회하면서 매칭되는 부분 찾기
   for (const cat of categories) {
-    if (remaining.includes(cat)) {
+    if (remaining && remaining.includes(cat)) {
       foundCategories.push(cat);
       // 찾은 카테고리를 제거 (중복 방지)
       remaining = remaining.replace(cat, '');
