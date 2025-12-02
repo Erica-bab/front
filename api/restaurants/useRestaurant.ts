@@ -13,9 +13,14 @@ import {
   MenuListParams,
   MenuListResponse,
   UpdateRestaurantRequest,
+  UpdateRestaurantResponse,
   UpdateRestaurantHoursRequest,
+  UpdateRestaurantHoursResponse,
   CreateMenuRequest,
+  CreateMenuResponse,
   UpdateMenuRequest,
+  UpdateMenuResponse,
+  DeleteMenuResponse,
 } from './types';
 
 // 카테고리 매핑
