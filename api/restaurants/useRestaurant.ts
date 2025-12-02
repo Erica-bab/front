@@ -73,7 +73,7 @@ export const filterToParams = (filter: FilterState): RestaurantListParams => {
     params.affiliations = filter.affiliations.join(',');
   }
 
-  if (filter.subCategory) {
+  if (filter.subCategory && filter.subCategory.trim() !== '') {
     params.sub_category = String(SUB_CATEGORY_MAP[filter.subCategory] || filter.subCategory);
   }
 
@@ -109,7 +109,19 @@ export const useRestaurantList = (params?: RestaurantListParams) => {
   });
 };
 
-export const useRestaurantDetail = (restaurantId: number, params?: { lat?: number; lng?: number }) => {
+
+// 클라이언트 정렬용 새로운 엔드포인트
+export const useRestaurantListV2 = (params?: Omit<RestaurantListParams, 'sort'>) => {
+  return useQuery({
+    queryKey: ['restaurants-v2', params],
+    queryFn: async () => {
+      const { data } = await apiClient.get<RestaurantListResponse>('/restaurants/v2', { params });
+      return data;
+    },
+  });
+};
+
+export const useRestaurantDetail = (restaurantId: number, params?: { lat: number; lng: number }) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId, params],
     queryFn: async () => {

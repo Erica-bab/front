@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, Animated, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, TextInput, Pressable, Animated, ActivityIndicator, RefreshControl, AppState, AppStateStatus } from 'react-native';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -137,6 +137,8 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
   const [showMapModal, setShowMapModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState({ latitude: 0, longitude: 0 });
   const [refreshing, setRefreshing] = useState(false);
+  const locationUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const appState = useRef(AppState.currentState);
   const STICKY_THRESHOLD = 30;
   const locationUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -147,9 +149,11 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
     lng: currentLocation.longitude !== 0 ? currentLocation.longitude : undefined,
   });
 
-
-  const refreshLocation = useCallback(async () => {
-    setRefreshing(true);
+  // 위치 업데이트 로직 (RefreshControl 트리거 없음)
+  const updateLocation = useCallback(async (showRefreshIndicator = false) => {
+    if (showRefreshIndicator) {
+      setRefreshing(true);
+    }
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status === 'granted') {
@@ -166,17 +170,49 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
         });
 
         if (address) {
-          // 주소를 상세하게 표시 (| 구분자 제거)
-          const addressParts = [
-            address.region,
-            address.city,
-            address.district,
-            address.subregion,
-            address.street,
-            address.streetNumber
-          ].filter(Boolean);
+          // 주소를 상세하게 표시
+          let addressText = '';
           
-          let addressText = address.formattedAddress || addressParts.join(' ');
+          if (address.formattedAddress) {
+            // formattedAddress 사용 시 중복 단어 제거
+            const parts = address.formattedAddress.split(' ');
+            const uniqueParts: string[] = [];
+            const seen = new Set<string>();
+            
+            for (const part of parts) {
+              // 공백 제거 후 중복 체크
+              const trimmedPart = part.trim();
+              if (trimmedPart && !seen.has(trimmedPart)) {
+                seen.add(trimmedPart);
+                uniqueParts.push(trimmedPart);
+              }
+            }
+            
+            addressText = uniqueParts.join(' ');
+          } else {
+            // formattedAddress가 없으면 수동으로 조합 (중복 제거)
+            const addressParts = [
+              address.region,
+              address.city,
+              address.district,
+              address.subregion,
+              address.street,
+              address.streetNumber
+            ].filter(Boolean);
+            
+            // 중복 제거
+            const uniqueParts: string[] = [];
+            const seen = new Set<string>();
+            
+            for (const part of addressParts) {
+              if (part && !seen.has(part)) {
+                seen.add(part);
+                uniqueParts.push(part);
+              }
+            }
+            
+            addressText = uniqueParts.join(' ');
+          }
           
           // 30글자 넘어가면 ... 으로 잘라서 표시
           if (addressText.length > 30) {
@@ -192,18 +228,25 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
     } catch (error) {
       console.error('Failed to get location:', error);
     } finally {
-      setRefreshing(false);
+      if (showRefreshIndicator) {
+        setRefreshing(false);
+      }
     }
   }, [onLocationUpdate]);
 
-  useEffect(() => {
-    // 초기 위치 가져오기
-    refreshLocation();
+  // Pull-to-refresh용 위치 새로고침 (RefreshControl 트리거)
+  const refreshLocation = useCallback(async () => {
+    await updateLocation(true);
+  }, [updateLocation]);
 
-    // 5분마다 주기적으로 위치 업데이트
+  useEffect(() => {
+    // 초기 위치 가져오기 (RefreshControl 트리거 없음)
+    updateLocation(false);
+
+    // 1분마다 주기적으로 위치 업데이트 (RefreshControl 트리거 없음)
     locationUpdateIntervalRef.current = setInterval(() => {
-      refreshLocation();
-    }, 5 * 60 * 1000); // 5분
+      updateLocation(false);
+    }, 60 * 1000); // 1분
 
     // 5분마다 위치 자동 새로고침
     locationUpdateIntervalRef.current = setInterval(() => {
@@ -215,7 +258,25 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
         clearInterval(locationUpdateIntervalRef.current);
       }
     };
-  }, [refreshLocation]);
+  }, [updateLocation]);
+
+  // 앱이 포그라운드로 돌아올 때 위치 새로고침 (RefreshControl 트리거 없음)
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState: AppStateStatus) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        // 앱이 포그라운드로 돌아올 때 위치 새로고침 (RefreshControl 트리거 없음)
+        updateLocation(false);
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [updateLocation]);
 
   const handleRefresh = useCallback(async () => {
     await refreshLocation();
@@ -301,20 +362,27 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
         <View className='w-full rounded-full flex-row justify-between items-center px-4 py-2 bg-gray-100'>
           <TextInput
             placeholder="찾아라! 에리카의 맛집"
-            className="flex-1 text-base p-1"
+            className="flex-1 text-base"
             placeholderTextColor="#9CA3AF"
             value={searchText}
             onChangeText={setSearchText}
             onSubmitEditing={handleSearch}
             returnKeyType="search"
-            style={{ lineHeight: 16 }}
+            style={{ lineHeight: 16, paddingVertical: 8, paddingHorizontal: 4 }}
+            editable={true}
           />
           {searchText.length > 0 ? (
-            <Pressable onPress={handleClearSearch}>
+            <Pressable 
+              onPress={handleClearSearch}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Icon name="cancel" size={15} color="#9CA3AF" />
             </Pressable>
           ) : (
-            <Pressable onPress={handleSearch}>
+            <Pressable 
+              onPress={handleSearch}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
               <Icon name="search" width={35}/>
             </Pressable>
           )}
@@ -352,10 +420,10 @@ export default function SearchScreen({ children, onFilterPress, isFilterApplied,
       ) : (
         // 검색 모드가 아닐 때 기존 children 표시
         <>
-          {isFilterApplied && filterResultCount !== undefined && (
+          {filterResultCount !== undefined && (
             <View className="px-4 py-3 bg-gray-50">
               <Text className="text-sm text-gray-600">
-                필터 적용 결과 {filterResultCount}개
+                {isFilterApplied ? `필터 적용 결과 ${filterResultCount}개` : `식당 ${filterResultCount}개`}
               </Text>
             </View>
           )}
