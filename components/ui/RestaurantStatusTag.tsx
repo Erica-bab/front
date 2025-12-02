@@ -155,6 +155,7 @@ function getNextEventText(operatingStatus: RestaurantOperatingStatus): string | 
 export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRatingPress, onStatusPress }: RestaurantStatusTagProps) {
     const [showNextEvent, setShowNextEvent] = useState(false);
     const fadeAnim = useRef(new Animated.Value(1)).current;
+    const showNextEventRef = useRef(false);
     
     // operating_status가 없으면 기본값 사용
     if (!operatingStatus) {
@@ -179,16 +180,18 @@ export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRat
     const statusLabel = statusLabels[currentType];
     const nextEventText = getNextEventText(operatingStatus);
 
-    // 5초마다 토글
+    // 운영시간 토글: 상태 레이블 3초, 다음 이벤트 5초
     useEffect(() => {
         if (!nextEventText) {
             setShowNextEvent(false);
+            showNextEventRef.current = false;
             fadeAnim.setValue(1);
             return;
         }
 
         // 초기 상태: 상태 레이블 표시
         setShowNextEvent(false);
+        showNextEventRef.current = false;
         fadeAnim.setValue(1);
 
         const toggleText = () => {
@@ -199,7 +202,8 @@ export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRat
                 useNativeDriver: true,
             }).start(() => {
                 // 텍스트 변경
-                setShowNextEvent(prev => !prev);
+                showNextEventRef.current = !showNextEventRef.current;
+                setShowNextEvent(showNextEventRef.current);
                 // 페이드 인
                 Animated.timing(fadeAnim, {
                     toValue: 1,
@@ -209,19 +213,26 @@ export default function RestaurantStatusTag({ operatingStatus, rating = 0, onRat
             });
         };
 
-        // 5초 후 첫 번째 전환 (상태 레이블 → 다음 이벤트)
-        const timeout = setTimeout(() => {
-            toggleText();
-        }, 5000);
+        let timeoutId: NodeJS.Timeout | null = null;
 
-        // 10초마다 반복 (상태 레이블 ↔ 다음 이벤트)
-        const interval = setInterval(() => {
-            toggleText();
-        }, 10000);
+        const scheduleToggle = (delay: number) => {
+            timeoutId = setTimeout(() => {
+                toggleText();
+                // 다음 토글: 현재 상태에 따라 다른 지연 시간
+                // showNextEventRef.current가 true면 다음 이벤트 표시 중이므로 5초 후 상태 레이블로
+                // false면 상태 레이블 표시 중이므로 3초 후 다음 이벤트로
+                const nextDelay = showNextEventRef.current ? 5000 : 3000;
+                scheduleToggle(nextDelay);
+            }, delay);
+        };
+
+        // 3초 후 첫 번째 전환 (상태 레이블 → 다음 이벤트)
+        scheduleToggle(3000);
 
         return () => {
-            clearTimeout(timeout);
-            clearInterval(interval);
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
         };
     }, [nextEventText, fadeAnim]);
 
