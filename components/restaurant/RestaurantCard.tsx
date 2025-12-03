@@ -127,7 +127,7 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
         {[0, 1, 2].map(index => {
           const url = displayThumbnails[index];
           return url ? (
-              <View key={index} className="flex-1 rounded-lg overflow-hidden relative" style={{ aspectRatio: 1 }}>
+              <View key={index} className="flex-1 rounded-lg overflow-hidden relative" style={{ aspectRatio: 4/5 }}>
               <Image
                 source={{ uri: url }}
                 className="w-full h-full"
@@ -141,7 +141,7 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
                 )}
             </View>
           ) : (
-            <View key={index} className="flex-1 rounded-lg bg-gray-200 items-center justify-center" style={{ aspectRatio: 1 }}>
+            <View key={index} className="flex-1 rounded-lg bg-gray-200 items-center justify-center" style={{ aspectRatio: 4/5 }}>
               <Text className="text-gray-500 text-xs">이미지가 없습니다</Text>
             </View>
           );
