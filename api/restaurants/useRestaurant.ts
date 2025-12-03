@@ -123,7 +123,7 @@ export const useRestaurantListV2 = (params?: Omit<RestaurantListParams, 'sort'>)
   });
 };
 
-export const useRestaurantDetail = (restaurantId: number) => {
+export const useRestaurantDetail = (restaurantId: number, options?: { refetchInterval?: number }) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId],
     queryFn: async () => {
@@ -131,6 +131,7 @@ export const useRestaurantDetail = (restaurantId: number) => {
       return data;
     },
     enabled: !!restaurantId,
+    refetchInterval: options?.refetchInterval,
   });
 };
 
