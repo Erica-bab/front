@@ -30,16 +30,18 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
   const formattedCategory = category ? formatCategory(category) : '';
   
   // 별점 전용 엔드포인트로 별점 주기적 새로고침
+  const numericRestaurantId = restaurantId ? Number(restaurantId) : 0;
+  const isValidId = !isNaN(numericRestaurantId) && numericRestaurantId > 0;
   const { data: ratingStats } = useRatingStats(
-    restaurantId ? Number(restaurantId) : 0,
-    !!restaurantId,
+    isValidId ? numericRestaurantId : 0,
+    isValidId,
     {
-      refetchInterval: 60000, // 1분마다 새로고침
+      refetchInterval: isValidId ? 60000 : undefined, // 1분마다 새로고침 (restaurantId가 있을 때만)
     }
   );
   
   // 최신 별점 사용 (서버에서 가져온 별점이 있으면 사용, 없으면 props의 rating 사용)
-  const currentRating = ratingStats?.average ?? rating;
+  const currentRating = ratingStats?.average ?? rating ?? 0;
   
   // 식당 이미지 조회 (restaurantId가 있을 때만)
   const { data: imagesData } = useRestaurantImages(
