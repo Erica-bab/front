@@ -44,7 +44,7 @@ export default {
       },
       softwareKeyboardLayoutMode: "pan",
       label: "에푸",
-      versionCode: 5,
+      versionCode: 6,
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
       config: {
