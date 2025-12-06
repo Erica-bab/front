@@ -92,7 +92,7 @@ export default function App() {
         AddInfo: 'addinfo',
       },
     },
-    getStateFromPath(path, options) {
+    getStateFromPath(path: string, options?: any) {
       // share/:restaurantId 패턴을 RestaurantDetail로 매핑
       const shareMatch = path.match(/^share\/(\d+)$/);
       if (shareMatch) {
