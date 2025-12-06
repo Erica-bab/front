@@ -14,8 +14,8 @@ export default {
     userInterfaceStyle: "light",
     newArchEnabled: true,
     splash: {
-      image: "./assets/app/adaptive-icon.png",
-      resizeMode: "contain",
+      image: "./assets/app/splash-image.png",
+      resizeMode: "cover",
       backgroundColor: "#2563EB"
     },
     ios: {
