@@ -29,13 +29,14 @@ type RestaurantTabType = 'home' | 'menu' | 'comments' | 'photos';
 export default function RestaurantDetailScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute();
-  const { restaurantId, initialTab, openImageUploadModal } = route.params as { 
+  const { restaurantId, initialTab, openImageUploadModal: openImageUploadModalParam } = route.params as { 
     restaurantId?: string; 
     initialTab?: RestaurantTabType;
     openImageUploadModal?: boolean;
   };
   const [selectedTab, setSelectedTab] = useState<RestaurantTabType>(initialTab || 'home');
   const [commentText, setCommentText] = useState('');
+  const [shouldOpenImageUploadModal, setShouldOpenImageUploadModal] = useState(openImageUploadModalParam || false);
 
   const { isAuthenticated, isLoading: isAuthLoading, refreshAuthState } = useAuth();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -46,12 +47,22 @@ export default function RestaurantDetailScreen() {
   const { refetch: refetchRestaurantImages } = useRestaurantImages(restaurant?.id || 0);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
 
-  // openImageUploadModal 파라미터가 있으면 모달 열기
+  // openImageUploadModal 파라미터가 있으면 탭 변경 및 모달 열기
   useEffect(() => {
-    if (openImageUploadModal && restaurant) {
-      setShowImageUploadModal(true);
+    if (shouldOpenImageUploadModal) {
+      // 사진 탭으로 이동
+      setSelectedTab('photos');
+      // restaurant가 로드되면 모달 열기
+      if (restaurant && !isLoading) {
+        // 약간의 지연을 두어 탭 전환이 완료된 후 모달 열기
+        const timer = setTimeout(() => {
+          setShowImageUploadModal(true);
+          setShouldOpenImageUploadModal(false); // 한 번만 실행되도록
+        }, 300);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [openImageUploadModal, restaurant]);
+  }, [shouldOpenImageUploadModal, restaurant, isLoading]);
 
   // 댓글 임시 저장을 위한 키
   const COMMENT_DRAFT_KEY = `comment_draft_${restaurantId}`;
