@@ -163,11 +163,9 @@ export default function CafeteriaHeader({
                 <Text className={selectedLocation === locationCode ? TabClasses.onTextClass : TabClasses.offTextClass}>
                   {locationNames[locationCode]}
                 </Text>
-                {menuCount > 0 && (
-                  <Text className={`text-xs ml-1 ${selectedLocation === locationCode ? 'text-blue-400' : 'text-gray-400'}`}>
-                    {menuCount}
-                  </Text>
-                )}
+                <Text className={`text-xs ml-1 ${selectedLocation === locationCode ? 'text-blue-400' : 'text-gray-400'}`}>
+                  {menuCount}
+                </Text>
               </Pressable>
             );
           })}
@@ -191,11 +189,9 @@ export default function CafeteriaHeader({
                 <Text className={selectedTime === mealType ? TabClasses.onTextClass : TabClasses.offTextClass}>
                   {mealType}
                 </Text>
-                {menuCount > 0 && (
-                  <Text className={`text-xs ml-1 ${selectedTime === mealType ? 'text-blue-400' : 'text-gray-400'}`}>
-                    {menuCount}
-                  </Text>
-                )}
+                <Text className={`text-xs ml-1 ${selectedTime === mealType ? 'text-blue-400' : 'text-gray-400'}`}>
+                  {menuCount}
+                </Text>
               </Pressable>
             );
           })}
