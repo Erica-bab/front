@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, Alert, Share, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, FadeIn, FadeOut } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -331,34 +332,46 @@ export default function RestaurantDetailScreen() {
           {/* 탭 콘텐츠 */}
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View>
-              {selectedTab === 'home' && (() => {
-                // 클라이언트에서 거리 계산
-                const distance = userLocation && restaurant.location.latitude && restaurant.location.longitude
-                  ? calculateDistance(
-                      userLocation.lat,
-                      userLocation.lng,
-                      restaurant.location.latitude,
-                      restaurant.location.longitude
-                    )
-                  : null;
+              {selectedTab === 'home' && (
+                <Animated.View key="home" entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+                  {(() => {
+                    // 클라이언트에서 거리 계산
+                    const distance = userLocation && restaurant.location.latitude && restaurant.location.longitude
+                      ? calculateDistance(
+                          userLocation.lat,
+                          userLocation.lng,
+                          restaurant.location.latitude,
+                          restaurant.location.longitude
+                        )
+                      : null;
 
-                return <RestaurantHomeTab restaurant={restaurant} distance={distance} />;
-              })()}
-          {selectedTab === 'menu' && <RestaurantMenuTab restaurant={restaurant} />}
-          {selectedTab === 'comments' && (
-            <RestaurantCommentsTab
-              restaurant={restaurant}
-              onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
-            />
-          )}
-              {selectedTab === 'photos' && (
-                <RestaurantPhotosTab
-                  restaurant={restaurant}
-                  onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
-                  onAddPhotoPress={() => setShowImageUploadModal(true)}
-                />
+                    return <RestaurantHomeTab restaurant={restaurant} distance={distance} />;
+                  })()}
+                </Animated.View>
               )}
-        </View>
+              {selectedTab === 'menu' && (
+                <Animated.View key="menu" entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+                  <RestaurantMenuTab restaurant={restaurant} />
+                </Animated.View>
+              )}
+              {selectedTab === 'comments' && (
+                <Animated.View key="comments" entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+                  <RestaurantCommentsTab
+                    restaurant={restaurant}
+                    onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
+                  />
+                </Animated.View>
+              )}
+              {selectedTab === 'photos' && (
+                <Animated.View key="photos" entering={FadeIn.duration(200)} exiting={FadeOut.duration(150)}>
+                  <RestaurantPhotosTab
+                    restaurant={restaurant}
+                    onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
+                    onAddPhotoPress={() => setShowImageUploadModal(true)}
+                  />
+                </Animated.View>
+              )}
+            </View>
           </TouchableWithoutFeedback>
       </ScrollView>
 

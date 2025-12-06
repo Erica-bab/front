@@ -1,4 +1,5 @@
 import { View, Text, Pressable, Dimensions } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import Card from '@/components/ui/Card';
 import RestaurantStatusTag from '@/components/ui/RestaurantStatusTag';
 import Icon from '@/components/Icon';
@@ -63,8 +64,30 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
     }
   };
 
+  const cardScale = useSharedValue(1);
+
+  const cardAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: cardScale.value }],
+    };
+  });
+
   const handleCardPress = () => {
     navigation.navigate('RestaurantDetail', { restaurantId });
+  };
+
+  const handleCardPressIn = () => {
+    cardScale.value = withSpring(0.98, {
+      damping: 15,
+      stiffness: 300,
+    });
+  };
+
+  const handleCardPressOut = () => {
+    cardScale.value = withSpring(1, {
+      damping: 15,
+      stiffness: 300,
+    });
   };
 
   const handleEmptyImagePress = () => {
@@ -79,9 +102,14 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
   };
 
   return (
-    <Card className='bg-white border border-gray-100'>
-      {/* 식당 이름과 카테고리 영역 - 자세히보기로 이동 */}
-      <Pressable onPress={handleCardPress}>
+    <Animated.View style={cardAnimatedStyle}>
+      <Card className='bg-white border border-gray-100'>
+        {/* 식당 이름과 카테고리 영역 - 자세히보기로 이동 */}
+        <Pressable 
+          onPress={handleCardPress}
+          onPressIn={handleCardPressIn}
+          onPressOut={handleCardPressOut}
+        >
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center">
             <Text className="text-lg text-blue-500">{name}</Text>
@@ -199,10 +227,13 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
       </Pressable>
       <Pressable
         onPress={handleCardPress}
+        onPressIn={handleCardPressIn}
+        onPressOut={handleCardPressOut}
         className='w-full justify-center items-center bg-blue-500 p-1 rounded-lg'
       >
         <Text className='text-white font-bold p-1'>자세히보기</Text>
       </Pressable>
-    </Card>
+      </Card>
+    </Animated.View>
   );
 }

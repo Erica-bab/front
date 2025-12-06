@@ -35,6 +35,15 @@ function TabNavigator() {
         headerShown: false,
         tabBarActiveTintColor: '#2563EB',
         tabBarInactiveTintColor: '#000000',
+        tabBarStyle: {
+          borderTopWidth: 0,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+        },
+        animation: 'fade',
       }}
     >
       <Tab.Screen
@@ -125,7 +134,13 @@ export default function App() {
         <QueryClientProvider client={queryClient}>
           <BottomSheetModalProvider>
             <NavigationContainer linking={linking}>
-              <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Navigator 
+                screenOptions={{ 
+                  headerShown: false,
+                  animation: 'slide_from_right',
+                  animationDuration: 300,
+                }}
+              >
                 <Stack.Screen name="Main" component={TabNavigator} />
                 <Stack.Screen
                   name="Filter"
@@ -134,6 +149,7 @@ export default function App() {
                     headerShown: false,
                     presentation: 'transparentModal',
                     animation: 'slide_from_bottom',
+                    animationDuration: 250,
                   }}
                 />
                 <Stack.Screen
@@ -143,6 +159,7 @@ export default function App() {
                     headerShown: false,
                     presentation: 'transparentModal',
                     animation: 'slide_from_bottom',
+                    animationDuration: 250,
                   }}
                 />
                 <Stack.Screen
@@ -150,6 +167,8 @@ export default function App() {
                   component={RestaurantDetailScreen}
                   options={{
                     headerShown: false,
+                    animation: 'slide_from_right',
+                    animationDuration: 300,
                   }}
                 />
                 <Stack.Screen
@@ -157,6 +176,8 @@ export default function App() {
                   component={RestaurantEditScreen}
                   options={{
                     headerShown: false,
+                    animation: 'slide_from_right',
+                    animationDuration: 300,
                   }}
                 />
                 <Stack.Screen
@@ -164,6 +185,8 @@ export default function App() {
                   component={CommentDetailScreen}
                   options={{
                     headerShown: false,
+                    animation: 'slide_from_right',
+                    animationDuration: 300,
                   }}
                 />
                 <Stack.Screen
@@ -175,6 +198,8 @@ export default function App() {
                     headerStyle: { backgroundColor: '#3B82F6' },
                     headerTintColor: '#FFFFFF',
                     headerTitleStyle: { fontWeight: 'bold' },
+                    animation: 'slide_from_right',
+                    animationDuration: 300,
                   }}
                 />
                 <Stack.Screen
@@ -186,6 +211,8 @@ export default function App() {
                     headerStyle: { backgroundColor: '#3B82F6' },
                     headerTintColor: '#FFFFFF',
                     headerTitleStyle: { fontWeight: 'bold' },
+                    animation: 'slide_from_right',
+                    animationDuration: 300,
                   }}
                 />
               </Stack.Navigator>
