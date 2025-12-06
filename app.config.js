@@ -21,9 +21,14 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: "com.efoo.app",
-      buildNumber: "25",
+      buildNumber: "1",
       usesAppleSignIn: true,
       displayName: "에푸",
+      splash: {
+        image: "./assets/app/splash-image.png",
+        resizeMode: "cover",
+        backgroundColor: "#2563EB"
+      },
       infoPlist: {
         NSLocationWhenInUseUsageDescription: "주변 맛집을 위치순으로 정렬하기 위해 위치 정보가 필요합니다.",
         NSPhotoLibraryUsageDescription: "식당 사진을 추가하기 위해 갤러리 접근 권한이 필요합니다.",
@@ -36,6 +41,11 @@ export default {
       }
     },
     android: {
+      splash: {
+        image: "./assets/app/splash-image.png",
+        resizeMode: "cover",
+        backgroundColor: "#2563EB"
+      },
       adaptiveIcon: {
         foregroundImage: "./assets/app/adaptive-icon.png",
         backgroundColor: "#3072F0"
