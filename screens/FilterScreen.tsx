@@ -194,6 +194,13 @@ export default function FilterScreen() {
       affiliations: selectedAffiliates,
       subCategory: selectedRestaurantTypes[0],
     });
+    
+    // 운영시간 필터는 로컬에서 처리하지만, Restaurant.tsx에서 필터링하기 위해 params에 포함
+    if (finalDay && finalHour && finalMin) {
+      params.day_of_week = finalDay;
+      params.time = `${finalHour}:${finalMin}`;
+    }
+    
     onApply?.(params);
     goBack();
   };

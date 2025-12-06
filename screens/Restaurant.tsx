@@ -13,12 +13,15 @@ import { useRestaurantListV2, useUpdateRestaurantOperatingStatus } from '@/api/r
 import { RestaurantListParams } from '@/api/restaurants/types';
 import Icon from '@/components/Icon';
 import { calculateDistance } from '@/utils/calculateDistance';
+import { isRestaurantOpenAt } from '@/utils/operatingStatus';
 
 const SORT_OPTIONS = ['위치순', '별점순', '가격순'];
 
 export default function RestuarantScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
     const [filterParams, setFilterParams] = useState<Omit<RestaurantListParams, 'sort'>>({});
+    // 운영시간 필터는 로컬에서 처리하므로 별도로 관리
+    const [operatingTimeFilter, setOperatingTimeFilter] = useState<{ dayOfWeek?: string; hour?: string; minute?: string } | null>(null);
     const [sortOption, setSortOption] = useState<string>('위치순');
     const [isSortOpen, setIsSortOpen] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -102,8 +105,21 @@ export default function RestuarantScreen() {
     const handleFilterPress = () => {
         navigation.navigate('Filter', {
             onApply: (params: RestaurantListParams) => {
-                // sort, lat, lng 제거하고 필터 파라미터만 추출
-                const { sort, lat, lng, ...filterOnly } = params;
+                // sort, lat, lng, is_open_only, day_of_week, time 제거하고 필터 파라미터만 추출
+                // 운영시간 필터는 로컬에서 처리하므로 서버 파라미터에서 제외
+                const { sort, lat, lng, is_open_only, day_of_week, time, ...filterOnly } = params;
+                
+                // 운영시간 필터 정보 저장 (로컬 필터링용)
+                if (day_of_week || time) {
+                    const [hour, minute] = time ? time.split(':') : [undefined, undefined];
+                    setOperatingTimeFilter({
+                        dayOfWeek: day_of_week,
+                        hour,
+                        minute,
+                    });
+                } else {
+                    setOperatingTimeFilter(null);
+                }
                 
                 // 필터가 비어있는지 확인 (모든 값이 없거나 빈 배열/문자열인지)
                 const hasFilter = Object.keys(filterOnly).length > 0 && 
@@ -132,11 +148,23 @@ export default function RestuarantScreen() {
         return Object.keys(filterParams).some(key => key !== 'sort');
     }, [filterParams]);
 
-    // 클라이언트에서 정렬된 식당 리스트
+    // 클라이언트에서 운영시간 필터링 및 정렬된 식당 리스트
     const sortedRestaurants = useMemo(() => {
         if (!data?.restaurants) return [];
         
-        const restaurants = [...data.restaurants];
+        let restaurants = [...data.restaurants];
+        
+        // 운영시간 필터 적용 (로컬 필터링)
+        if (operatingTimeFilter?.dayOfWeek && operatingTimeFilter?.hour && operatingTimeFilter?.minute) {
+            const filterTime = `${operatingTimeFilter.hour}:${operatingTimeFilter.minute}`;
+            restaurants = restaurants.filter(restaurant => {
+                return isRestaurantOpenAt(
+                    restaurant.business_hours,
+                    operatingTimeFilter.dayOfWeek!,
+                    filterTime
+                );
+            });
+        }
         
         if (sortOption === '위치순' && userLocation) {
             // 거리순 정렬 (클라이언트에서 계산)
@@ -182,7 +210,7 @@ export default function RestuarantScreen() {
         
         // 기본 정렬 (ID 내림차순)
         return restaurants;
-    }, [data?.restaurants, sortOption, userLocation]);
+    }, [data?.restaurants, sortOption, userLocation, operatingTimeFilter]);
 
     return (
         <SafeAreaView edges={['top']} className="flex-1 bg-white">

@@ -83,15 +83,16 @@ export const filterToParams = (filter: FilterState): RestaurantListParams => {
     params.sub_category = String(SUB_CATEGORY_MAP[filter.subCategory] || filter.subCategory);
   }
 
-  if (filter.dayOfWeek || (filter.hour && filter.minute)) {
-    params.is_open_only = true;
-    if (filter.dayOfWeek) {
-      params.day_of_week = String(DAY_MAP[filter.dayOfWeek] || filter.dayOfWeek);
-    }
-    if (filter.hour && filter.minute) {
-      params.time = `${filter.hour}:${filter.minute}`;
-    }
-  }
+  // 운영시간 필터는 클라이언트에서 처리하므로 서버 파라미터로 전송하지 않음
+  // if (filter.dayOfWeek || (filter.hour && filter.minute)) {
+  //   params.is_open_only = true;
+  //   if (filter.dayOfWeek) {
+  //     params.day_of_week = String(DAY_MAP[filter.dayOfWeek] || filter.dayOfWeek);
+  //   }
+  //   if (filter.hour && filter.minute) {
+  //     params.time = `${filter.hour}:${filter.minute}`;
+  //   }
+  // }
 
   return params;
 };
