@@ -38,6 +38,13 @@ export default function RestaurantDetailScreen() {
   const [commentText, setCommentText] = useState('');
   const [shouldOpenImageUploadModal, setShouldOpenImageUploadModal] = useState(openImageUploadModalParam || false);
 
+  // route.params가 변경될 때 shouldOpenImageUploadModal 업데이트
+  useEffect(() => {
+    if (openImageUploadModalParam) {
+      setShouldOpenImageUploadModal(true);
+    }
+  }, [openImageUploadModalParam]);
+
   const { isAuthenticated, isLoading: isAuthLoading, refreshAuthState } = useAuth();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
