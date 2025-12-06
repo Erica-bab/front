@@ -135,7 +135,6 @@ export default function RestaurantPhotosTab({ restaurant, onShowLogin, onAddPhot
         contentContainerStyle={{ padding: IMAGE_GAP }}
         columnWrapperStyle={{ marginHorizontal: -IMAGE_GAP / 2 }}
         nestedScrollEnabled={true} // ScrollView 안에서 중첩 스크롤 허용
-        scrollEnabled={false} // 부모 ScrollView가 스크롤 처리
         // 레이지 로딩 최적화
         initialNumToRender={9} // 처음 9개만 렌더링 (3x3)
         maxToRenderPerBatch={6} // 한 번에 6개씩 추가 렌더링
