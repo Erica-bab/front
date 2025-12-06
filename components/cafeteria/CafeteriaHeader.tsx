@@ -158,13 +158,13 @@ export default function CafeteriaHeader({
               <Pressable
                 key={locationCode}
                 onPress={() => onChangeLocation(locationCode)}
-                className={`flex-row items-center ${TabClasses.baseBoxClass} ${selectedLocation === locationCode ? TabClasses.onBoxClass : ''}`}
+                className={`items-center ${TabClasses.baseBoxClass} ${selectedLocation === locationCode ? TabClasses.onBoxClass : ''}`}
               >
+                <Text className={`text-xs mb-1 ${selectedLocation === locationCode ? 'text-blue-400' : 'text-gray-400'}`}>
+                  {menuCount}개
+                </Text>
                 <Text className={selectedLocation === locationCode ? TabClasses.onTextClass : TabClasses.offTextClass}>
                   {locationNames[locationCode]}
-                </Text>
-                <Text className={`text-xs ml-1 ${selectedLocation === locationCode ? 'text-blue-400' : 'text-gray-400'}`}>
-                  {menuCount}
                 </Text>
               </Pressable>
             );
@@ -184,13 +184,13 @@ export default function CafeteriaHeader({
               <Pressable
                 key={mealType}
                 onPress={() => onChangeTime(mealType)}
-                className={`flex-row items-center ${TabClasses.baseBoxClass} ${selectedTime === mealType ? TabClasses.onBoxClass : ''}`}
+                className={`items-center ${TabClasses.baseBoxClass} ${selectedTime === mealType ? TabClasses.onBoxClass : ''}`}
               >
+                <Text className={`text-xs mb-1 ${selectedTime === mealType ? 'text-blue-400' : 'text-gray-400'}`}>
+                  {menuCount}개
+                </Text>
                 <Text className={selectedTime === mealType ? TabClasses.onTextClass : TabClasses.offTextClass}>
                   {mealType}
-                </Text>
-                <Text className={`text-xs ml-1 ${selectedTime === mealType ? 'text-blue-400' : 'text-gray-400'}`}>
-                  {menuCount}
                 </Text>
               </Pressable>
             );
