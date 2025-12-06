@@ -263,16 +263,10 @@ export default function ReplyItem({
                             <Text className="text-center">수정</Text>
                           </Pressable>
                           <Pressable
-                            className="py-3 px-4 border-b border-gray-200"
+                            className="py-3 px-4"
                             onPress={handleDelete}
                           >
                             <Text className="text-center text-red-500">삭제</Text>
-                          </Pressable>
-                          <Pressable
-                            className="py-3 px-4"
-                            onPress={handleReport}
-                          >
-                            <Text className="text-center text-gray-600">신고</Text>
                           </Pressable>
                         </>
                       ) : (
