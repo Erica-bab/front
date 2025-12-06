@@ -293,12 +293,13 @@ export default function FilterScreen() {
   }, [initialFilterState, operatingTimeMode, selectedDay, selectedHour, selectedMin, selectedFoodTypes, selectedAffiliates, selectedRestaurantTypes]);
 
   const handleApply = async () => {
-    // 운영중 모드인 경우 현재 시간으로 업데이트
+    // 적용 시점의 필터 상태 계산 (운영중 모드인 경우 현재 시간으로 업데이트)
     let finalDay = selectedDay;
     let finalHour = selectedHour;
     let finalMin = selectedMin;
     
     if (operatingTimeMode === 'operating') {
+      // 운영중 모드: 적용 시점의 현재 시간 사용
       const currentTime = getCurrentTime();
       finalDay = currentTime.day;
       finalHour = currentTime.hour;
@@ -321,8 +322,16 @@ export default function FilterScreen() {
       }
     }
 
+    // 적용 시점의 필터 상태 확인 (finalDay, finalHour, finalMin 사용)
+    const hasFilterAtApply = (
+      (finalDay !== undefined) ||
+      selectedFoodTypes.length > 0 ||
+      selectedAffiliates.length > 0 ||
+      selectedRestaurantTypes.length > 0
+    );
+
     // 필터가 선택되지 않았을 때는 스토리지 삭제
-    if (!hasSelectedFilter) {
+    if (!hasFilterAtApply) {
       try {
         await AsyncStorage.removeItem('restaurantFilter');
       } catch (error) {
@@ -335,7 +344,7 @@ export default function FilterScreen() {
       return;
     }
 
-    // 필터 저장
+    // 필터 저장 (적용 시점의 상태 저장)
     try {
       const filterData = {
         operatingTimeMode,
@@ -351,6 +360,7 @@ export default function FilterScreen() {
       console.error('Failed to save filter:', error);
     }
 
+    // 적용 시점의 필터 상태로 params 생성
     const params = filterToParams({
       dayOfWeek: finalDay,
       hour: finalHour,
@@ -369,6 +379,7 @@ export default function FilterScreen() {
       }
     }
     
+    // 적용 시점의 필터 상태 전달
     onApply?.(params);
     goBack();
   };
