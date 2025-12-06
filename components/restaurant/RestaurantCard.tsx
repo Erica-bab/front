@@ -5,8 +5,6 @@ import Icon from '@/components/Icon';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RestaurantOperatingStatus, BusinessHours } from '@/api/restaurants/types';
-import { useRestaurantImages } from '@/api/restaurants/useRestaurantImage';
-import { useRatingStats } from '@/api/restaurants/useRating';
 import { formatDistance } from '@/utils/formatDistance';
 import { formatCategory } from '@/utils/formatCategory';
 import { resolveImageUri, getRandomThumbnails } from '@/utils/image';
@@ -16,10 +14,10 @@ interface RestaurantCardProps {
   category: string | string[];
   operatingStatus?: RestaurantOperatingStatus | null; // 서버에서 받은 운영 상태 (선택적)
   businessHours?: BusinessHours | null; // 운영시간 정보 (클라이언트 계산용)
-  rating: number;
+  rating: number; // 서버에서 받은 별점 (리스트 API에서 이미 포함)
   comment?: string;
   restaurantId?: string;
-  thumbnailUrls?: string[];
+  thumbnailUrls?: string[]; // 서버에서 받은 썸네일 URL (리스트 API에서 이미 포함)
   distance?: number | null;
   onStatusExpired?: () => void; // 상태가 만료되었을 때 호출되는 콜백
 }
@@ -30,32 +28,17 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
   
   const formattedCategory = category ? formatCategory(category) : '';
   
-  // 별점 전용 엔드포인트로 별점 주기적 새로고침
-  const numericRestaurantId = restaurantId ? Number(restaurantId) : 0;
-  const isValidId = !isNaN(numericRestaurantId) && numericRestaurantId > 0;
-  const { data: ratingStats } = useRatingStats(
-    isValidId ? numericRestaurantId : 0,
-    isValidId,
-    {
-      refetchInterval: isValidId ? 60000 : undefined, // 1분마다 새로고침 (restaurantId가 있을 때만)
-    }
+  // props로 받은 별점 사용 (리스트 API에서 이미 포함된 데이터)
+  const currentRating = rating ?? 0;
+  
+  // props로 받은 썸네일 URL 사용 (리스트 API에서 이미 포함된 데이터)
+  const displayThumbnails = getRandomThumbnails(
+    (thumbnailUrls || []).map(resolveImageUri).filter((url): url is string => url !== null),
+    3
   );
   
-  // 최신 별점 사용 (서버에서 가져온 별점이 있으면 사용, 없으면 props의 rating 사용)
-  const currentRating = ratingStats?.average ?? rating ?? 0;
-  
-  // 식당 이미지 조회 (restaurantId가 있을 때만)
-  const { data: imagesData } = useRestaurantImages(
-    restaurantId ? Number(restaurantId) : 0
-  );
-
-  const imageUrls = (imagesData?.images?.map(img => resolveImageUri(img.image_url)).filter((url): url is string => url !== null) || []);
-  const displayThumbnails = imageUrls.length > 0
-    ? getRandomThumbnails(imageUrls, 3)
-    : getRandomThumbnails((thumbnailUrls || []).map(resolveImageUri).filter((url): url is string => url !== null), 3);
-  
-  // 전체 이미지 개수
-  const totalImageCount = imagesData?.total_count || imageUrls.length || thumbnailUrls?.length || 0;
+  // 전체 이미지 개수 (썸네일 개수로 추정, 정확한 개수는 상세 화면에서 확인)
+  const totalImageCount = thumbnailUrls?.length || 0;
   const hasMoreImages = totalImageCount > 3;
 
   const handleRatingPress = () => {

@@ -110,17 +110,20 @@ export default function RestaurantDetailScreen() {
       return;
     }
 
-    toggleBookmark(Number(restaurantId), {
-      onSuccess: () => {
-        refetchBookmark();
-      },
-      onError: (err) => {
-        if ((err as AxiosError)?.response?.status === 403) {
-          (navigation.navigate as any)('Login', { onSuccess: refreshAuthState });
-        }
-        console.error('Failed to toggle bookmark:', err);
-      },
-    });
+    toggleBookmark(
+      { restaurantId: Number(restaurantId), currentState: isBookmarked },
+      {
+        onSuccess: () => {
+          refetchBookmark();
+        },
+        onError: (err) => {
+          if ((err as AxiosError)?.response?.status === 403) {
+            (navigation.navigate as any)('Login', { onSuccess: refreshAuthState });
+          }
+          console.error('Failed to toggle bookmark:', err);
+        },
+      }
+    );
   };
 
   // 공유 핸들러

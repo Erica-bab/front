@@ -27,17 +27,21 @@ export default function BookmarkScreen() {
         {
           text: '예',
           onPress: () => {
-            toggleBookmark(restaurantId, {
-              onSuccess: () => {
-                refetch();
-              },
-              onError: (err) => {
-                if ((err as AxiosError)?.response?.status === 403) {
-                  (navigation.navigate as any)('Login');
-                }
-                console.error('Failed to remove bookmark:', err);
-              },
-            });
+            // 북마크 목록에서 삭제하므로 현재 상태는 true
+            toggleBookmark(
+              { restaurantId, currentState: true },
+              {
+                onSuccess: () => {
+                  refetch();
+                },
+                onError: (err) => {
+                  if ((err as AxiosError)?.response?.status === 403) {
+                    (navigation.navigate as any)('Login');
+                  }
+                  console.error('Failed to remove bookmark:', err);
+                },
+              }
+            );
           },
         },
       ]

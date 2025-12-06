@@ -77,6 +77,7 @@ export const useUpdateComment = (restaurantId: number, commentId: number) => {
       return data;
     },
     onSuccess: () => {
+      // 댓글 수정은 댓글 목록만 무효화 (상세 정보에는 영향 없음)
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId, 'comments'] });
     },
   });
@@ -94,6 +95,7 @@ export const useDeleteComment = (restaurantId: number) => {
       return data;
     },
     onSuccess: () => {
+      // 댓글 삭제는 댓글 개수에 영향을 주므로 상세 정보도 무효화
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId, 'comments'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
     },
@@ -117,6 +119,7 @@ export const useToggleCommentLike = (restaurantId: number) => {
       return data;
     },
     onSuccess: () => {
+      // 좋아요는 댓글 목록만 무효화 (상세 정보에는 영향 없음)
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId, 'comments'] });
     },
   });
@@ -139,6 +142,7 @@ export const useReportComment = (restaurantId: number) => {
       return data;
     },
     onSuccess: () => {
+      // 신고는 댓글 목록만 무효화 (상세 정보에는 영향 없음)
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId, 'comments'] });
     },
   });

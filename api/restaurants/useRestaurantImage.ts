@@ -85,12 +85,15 @@ export const useUploadRestaurantImage = (restaurantId: number) => {
       // display_order 추가
       formData.append('display_order', String(displayOrder));
 
-      console.log('Upload FormData:', {
-        imageUri,
-        filename,
-        type,
-        displayOrder,
-      });
+      // 개발 환경에서만 로그 출력
+      if (__DEV__) {
+        console.log('Upload FormData:', {
+          imageUri,
+          filename,
+          type,
+          displayOrder,
+        });
+      }
 
       // multipart/form-data로 업로드
       // interceptor에서 FormData인 경우 Content-Type을 자동으로 제거하므로 여기서는 설정하지 않음
