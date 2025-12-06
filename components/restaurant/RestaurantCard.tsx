@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Image } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import Card from '@/components/ui/Card';
 import RestaurantStatusTag from '@/components/ui/RestaurantStatusTag';
 import Icon from '@/components/Icon';
@@ -8,6 +8,7 @@ import { RestaurantOperatingStatus, BusinessHours } from '@/api/restaurants/type
 import { formatDistance } from '@/utils/formatDistance';
 import { formatCategory } from '@/utils/formatCategory';
 import { resolveImageUri, getRandomThumbnails } from '@/utils/image';
+import LazyImage from '@/components/ui/LazyImage';
 
 interface RestaurantCardProps {
   name: string;
@@ -97,10 +98,11 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
           const url = displayThumbnails[index];
           return url ? (
               <View key={index} className="flex-1 rounded-lg overflow-hidden relative" style={{ aspectRatio: 4/5 }}>
-              <Image
+              <LazyImage
                 source={{ uri: url }}
-                className="w-full h-full"
+                style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
+                threshold={200} // 뷰포트에서 200px 전에 로드 시작
               />
                 {/* 마지막 썸네일이고 더 많은 사진이 있을 때 "더보기" 오버레이 */}
                 {index === 2 && hasMoreImages && (

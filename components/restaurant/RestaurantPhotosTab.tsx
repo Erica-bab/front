@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, Image, Pressable, Alert, ActivityIndicator, Dimensions, Modal } from 'react-native';
+import { View, Text, FlatList, Pressable, Alert, ActivityIndicator, Dimensions, Modal } from 'react-native';
 import { RestaurantDetailResponse } from '@/api/restaurants/types';
 import { useRestaurantImages, useDeleteRestaurantImage } from '@/api/restaurants/useRestaurantImage';
 import { useAuth, useCurrentUser } from '@/api/auth/useAuth';
 import Icon from '@/components/Icon';
 import { getSafeErrorMessage } from '@/utils/errorHandler';
+import LazyImage from '@/components/ui/LazyImage';
+import { resolveImageUri } from '@/utils/image';
 
 interface RestaurantPhotosTabProps {
   restaurant: RestaurantDetailResponse;
@@ -126,11 +128,19 @@ export default function RestaurantPhotosTab({ restaurant, onShowLogin, onAddPhot
         <Text className="text-gray-700 text-sm font-medium">사진 추가하기</Text>
       </Pressable>
 
-      <View style={{ padding: IMAGE_GAP }}>
-        <View className="flex-row flex-wrap" style={{ marginHorizontal: -IMAGE_GAP / 2 }}>
-        {imageUrls.map((item, index) => (
+      <FlatList
+        data={imageUrls}
+        numColumns={IMAGES_PER_ROW}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={{ padding: IMAGE_GAP }}
+        columnWrapperStyle={{ marginHorizontal: -IMAGE_GAP / 2 }}
+        // 레이지 로딩 최적화
+        initialNumToRender={9} // 처음 9개만 렌더링 (3x3)
+        maxToRenderPerBatch={6} // 한 번에 6개씩 추가 렌더링
+        windowSize={5} // 화면 높이의 5배만큼만 메모리 유지
+        removeClippedSubviews={true} // 뷰포트 밖의 뷰 제거
+        renderItem={({ item }) => (
           <View
-            key={item.id}
             style={{
               width: IMAGE_SIZE,
               height: IMAGE_SIZE,
@@ -139,10 +149,11 @@ export default function RestaurantPhotosTab({ restaurant, onShowLogin, onAddPhot
             className="relative rounded-lg overflow-hidden bg-gray-200"
           >
             <Pressable onPress={() => setSelectedImage(item.url!)}>
-              <Image
+              <LazyImage
                 source={{ uri: item.url! }}
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
+                threshold={300} // 뷰포트에서 300px 전에 로드 시작
               />
             </Pressable>
             {/* 본인이 업로드한 이미지에만 삭제 버튼 표시 */}
@@ -157,9 +168,8 @@ export default function RestaurantPhotosTab({ restaurant, onShowLogin, onAddPhot
               </Pressable>
             )}
           </View>
-        ))}
-        </View>
-      </View>
+        )}
+      />
 
       {/* 이미지 확대 모달 */}
       <Modal
