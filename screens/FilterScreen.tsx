@@ -463,7 +463,6 @@ export default function FilterScreen() {
             <Button 
               onPress={handleApply} 
               className={showResetButton ? "flex-1" : "w-full"}
-              disabled={!hasSelectedFilter}
             >
               적용
             </Button>
