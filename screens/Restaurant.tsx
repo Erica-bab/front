@@ -13,7 +13,7 @@ import { useRestaurantListV2, useUpdateRestaurantOperatingStatus } from '@/api/r
 import { RestaurantListParams } from '@/api/restaurants/types';
 import Icon from '@/components/Icon';
 import { calculateDistance } from '@/utils/calculateDistance';
-import { isRestaurantOpenAt } from '@/utils/operatingStatus';
+import { isRestaurantOpenAt, hasOperatingHoursOnDay } from '@/utils/operatingStatus';
 
 const SORT_OPTIONS = ['위치순', '별점순', '가격순'];
 
@@ -110,7 +110,8 @@ export default function RestuarantScreen() {
                 const { sort, lat, lng, is_open_only, day_of_week, time, ...filterOnly } = params;
                 
                 // 운영시간 필터 정보 저장 (로컬 필터링용)
-                if (day_of_week || time) {
+                // 요일만 선택한 경우도 포함
+                if (day_of_week) {
                     const [hour, minute] = time ? time.split(':') : [undefined, undefined];
                     setOperatingTimeFilter({
                         dayOfWeek: day_of_week,
@@ -143,10 +144,12 @@ export default function RestuarantScreen() {
         });
     };
 
-    // 필터가 적용되었는지 확인 (sort 제외)
+    // 필터가 적용되었는지 확인 (sort 제외, 운영시간 필터 포함)
     const isFilterApplied = useMemo(() => {
-        return Object.keys(filterParams).some(key => key !== 'sort');
-    }, [filterParams]);
+        const hasOtherFilters = Object.keys(filterParams).some(key => key !== 'sort');
+        const hasOperatingTimeFilter = operatingTimeFilter !== null;
+        return hasOtherFilters || hasOperatingTimeFilter;
+    }, [filterParams, operatingTimeFilter]);
 
     // 클라이언트에서 운영시간 필터링 및 정렬된 식당 리스트
     const sortedRestaurants = useMemo(() => {
@@ -155,15 +158,26 @@ export default function RestuarantScreen() {
         let restaurants = [...data.restaurants];
         
         // 운영시간 필터 적용 (로컬 필터링)
-        if (operatingTimeFilter?.dayOfWeek && operatingTimeFilter?.hour && operatingTimeFilter?.minute) {
-            const filterTime = `${operatingTimeFilter.hour}:${operatingTimeFilter.minute}`;
-            restaurants = restaurants.filter(restaurant => {
-                return isRestaurantOpenAt(
-                    restaurant.business_hours,
-                    operatingTimeFilter.dayOfWeek!,
-                    filterTime
-                );
-            });
+        if (operatingTimeFilter?.dayOfWeek) {
+            if (operatingTimeFilter.hour && operatingTimeFilter.minute) {
+                // 요일 + 시간 + 분 모두 선택한 경우: 해당 시간에 운영중인지 확인
+                const filterTime = `${operatingTimeFilter.hour}:${operatingTimeFilter.minute}`;
+                restaurants = restaurants.filter(restaurant => {
+                    return isRestaurantOpenAt(
+                        restaurant.business_hours,
+                        operatingTimeFilter.dayOfWeek!,
+                        filterTime
+                    );
+                });
+            } else {
+                // 요일만 선택한 경우: 해당 요일에 운영시간이 있는지만 확인
+                restaurants = restaurants.filter(restaurant => {
+                    return hasOperatingHoursOnDay(
+                        restaurant.business_hours,
+                        operatingTimeFilter.dayOfWeek!
+                    );
+                });
+            }
         }
         
         if (sortOption === '위치순' && userLocation) {

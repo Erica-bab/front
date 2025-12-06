@@ -247,22 +247,41 @@ export function calculateOperatingStatus(
 }
 
 /**
+ * 특정 요일에 운영시간이 있는지 확인 (요일만 선택한 경우)
+ * 
+ * @param businessHours 운영시간 정보
+ * @param dayOfWeek 요일 ('월', '화', '수', '목', '금', '토', '일')
+ * @returns 해당 요일에 운영시간이 있으면 true, 없으면 false
+ */
+export function hasOperatingHoursOnDay(
+  businessHours: BusinessHours | null | undefined,
+  dayOfWeek: string
+): boolean {
+  if (!businessHours) return false;
+
+  // 요일을 정규화
+  const normalizedDay = normalizeDay(dayOfWeek);
+  if (!normalizedDay) return false;
+
+  const dayHours = businessHours[normalizedDay as keyof BusinessHours];
+  // 해당 요일에 운영시간이 있고, 휴무일이 아니면 true
+  return !!(dayHours && !dayHours.is_closed && dayHours.open_time && dayHours.close_time);
+}
+
+/**
  * 특정 요일과 시간에 식당이 운영중인지 확인
  * 
  * @param businessHours 운영시간 정보
  * @param dayOfWeek 요일 ('월', '화', '수', '목', '금', '토', '일')
- * @param time 시간 ('HH:MM' 형식)
+ * @param time 시간 ('HH:MM' 형식, 선택사항)
  * @returns 운영중이면 true, 아니면 false
  */
 export function isRestaurantOpenAt(
   businessHours: BusinessHours | null | undefined,
   dayOfWeek: string,
-  time: string
+  time?: string
 ): boolean {
   if (!businessHours) return false;
-
-  const [hours, minutes] = time.split(':').map(Number);
-  if (isNaN(hours) || isNaN(minutes)) return false;
 
   // 요일을 정규화
   const normalizedDay = normalizeDay(dayOfWeek);
@@ -270,6 +289,14 @@ export function isRestaurantOpenAt(
 
   const dayHours = businessHours[normalizedDay as keyof BusinessHours];
   if (!dayHours || dayHours.is_closed) return false;
+
+  // 시간이 없으면 해당 요일에 운영시간이 있는지만 확인
+  if (!time) {
+    return !!(dayHours.open_time && dayHours.close_time);
+  }
+
+  const [hours, minutes] = time.split(':').map(Number);
+  if (isNaN(hours) || isNaN(minutes)) return false;
 
   // 해당 요일의 Date 객체 생성
   const dayIndex = DAY_ORDER.indexOf(normalizedDay);

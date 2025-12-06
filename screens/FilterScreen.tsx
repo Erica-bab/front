@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Modal, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -168,6 +168,17 @@ export default function FilterScreen() {
       finalDay = undefined;
       finalHour = undefined;
       finalMin = undefined;
+    } else if (operatingTimeMode === 'manual') {
+      // 수동 선택 모드에서 시간만 선택하고 요일이 없으면 경고
+      if (finalHour && !finalDay) {
+        Alert.alert('요일 선택 필요', '시간을 선택하려면 요일도 선택해주세요.');
+        return;
+      }
+      
+      // 분이 선택되지 않았으면 00분을 기본값으로 사용
+      if (finalDay && finalHour && !finalMin) {
+        finalMin = '00';
+      }
     }
 
     // 필터 저장
@@ -196,9 +207,12 @@ export default function FilterScreen() {
     });
     
     // 운영시간 필터는 로컬에서 처리하지만, Restaurant.tsx에서 필터링하기 위해 params에 포함
-    if (finalDay && finalHour && finalMin) {
+    // 요일만 선택한 경우도 포함
+    if (finalDay) {
       params.day_of_week = finalDay;
-      params.time = `${finalHour}:${finalMin}`;
+      if (finalHour && finalMin) {
+        params.time = `${finalHour}:${finalMin}`;
+      }
     }
     
     onApply?.(params);
