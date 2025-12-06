@@ -181,7 +181,7 @@ export default function RestaurantHomeTab({ restaurant, distance }: RestaurantHo
       )}
       {restaurant.menu_summary?.average_price && (
         <View className='flex-row gap-4 mb-4 items-center'>
-          <Icon width={20} name='docs' color="rgba(107, 114, 128, 1)"/>
+          <Icon width={20} name='money' color="rgba(107, 114, 128, 1)"/>
           <Text>평균 {Math.round(restaurant.menu_summary.average_price).toLocaleString()}원</Text>
         </View>
       )}
