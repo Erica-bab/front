@@ -29,7 +29,11 @@ type RestaurantTabType = 'home' | 'menu' | 'comments' | 'photos';
 export default function RestaurantDetailScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const route = useRoute();
-  const { restaurantId, initialTab } = route.params as { restaurantId?: string; initialTab?: RestaurantTabType };
+  const { restaurantId, initialTab, openImageUploadModal } = route.params as { 
+    restaurantId?: string; 
+    initialTab?: RestaurantTabType;
+    openImageUploadModal?: boolean;
+  };
   const [selectedTab, setSelectedTab] = useState<RestaurantTabType>(initialTab || 'home');
   const [commentText, setCommentText] = useState('');
 
@@ -41,6 +45,13 @@ export default function RestaurantDetailScreen() {
   const { mutate: createComment, isPending: isCommentLoading } = useCreateComment(Number(restaurantId));
   const { refetch: refetchRestaurantImages } = useRestaurantImages(restaurant?.id || 0);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false);
+
+  // openImageUploadModal 파라미터가 있으면 모달 열기
+  useEffect(() => {
+    if (openImageUploadModal && restaurant) {
+      setShowImageUploadModal(true);
+    }
+  }, [openImageUploadModal, restaurant]);
 
   // 댓글 임시 저장을 위한 키
   const COMMENT_DRAFT_KEY = `comment_draft_${restaurantId}`;

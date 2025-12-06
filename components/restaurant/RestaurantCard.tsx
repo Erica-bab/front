@@ -67,6 +67,17 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
     navigation.navigate('RestaurantDetail', { restaurantId });
   };
 
+  const handleEmptyImagePress = () => {
+    if (restaurantId) {
+      // 사진 탭으로 이동하고 사진 추가 모달 열기
+      navigation.navigate('RestaurantDetail', { 
+        restaurantId, 
+        initialTab: 'photos',
+        openImageUploadModal: true 
+      });
+    }
+  };
+
   return (
     <Card className='bg-white border border-gray-100'>
       {/* 식당 이름과 카테고리 영역 - 자세히보기로 이동 */}
@@ -99,61 +110,71 @@ export default function RestaurantCard({ name, category, operatingStatus, busine
       </View>
       
       {/* 썸네일 표시 - 이미지 영역만 사진 탭으로 이동 */}
-      <Pressable
-        onPress={() => navigation.navigate('RestaurantDetail', { restaurantId, initialTab: 'photos' })}
-      >
-        <View className="flex-row gap-2 bg-gray-100 mb-2" style={{ height: FIXED_IMAGE_HEIGHT }}>
-          {displayThumbnails.length === 0 ? (
-            // 이미지가 없을 때: 전체 영역 하나로 합쳐서 메시지 표시
-            <View className="flex-1 rounded-lg bg-gray-200 items-center justify-center">
-              <Icon name="camera" width={32} height={32} color="#9CA3AF" />
-              <Text className="text-gray-500 text-sm mt-2 text-center px-4">
-                여기를 눌러 식당 사진을 추가해주세요
-              </Text>
-            </View>
-          ) : displayThumbnails.length === 1 ? (
-            // 이미지가 1개일 때: 1개로 전체 영역 차지
-            <View className="flex-1 rounded-lg overflow-hidden relative">
+      <View className="flex-row gap-2 bg-gray-100 mb-2" style={{ height: FIXED_IMAGE_HEIGHT }}>
+        {displayThumbnails.length === 0 ? (
+          // 이미지가 없을 때: 전체 영역 하나로 합쳐서 메시지 표시
+          <Pressable
+            onPress={handleEmptyImagePress}
+            className="flex-1 rounded-lg bg-gray-200 items-center justify-center"
+          >
+            <Icon name="camera" width={32} height={32} color="#9CA3AF" />
+            <Text className="text-gray-500 text-sm mt-2 text-center px-4">
+              여기를 눌러 식당 사진을 추가해주세요
+            </Text>
+          </Pressable>
+        ) : displayThumbnails.length === 1 ? (
+          // 이미지가 1개일 때: 1개로 전체 영역 차지 (가운데 정렬)
+          <Pressable
+            onPress={() => navigation.navigate('RestaurantDetail', { restaurantId, initialTab: 'photos' })}
+            className="flex-1 rounded-lg overflow-hidden relative"
+          >
+            <LazyImage
+              source={{ uri: displayThumbnails[0] }}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="center"
+              threshold={200}
+            />
+          </Pressable>
+        ) : displayThumbnails.length === 2 ? (
+          // 이미지가 2개일 때: 2개로 전체 영역 차지 (가운데 정렬)
+          displayThumbnails.map((url, index) => (
+            <Pressable
+              key={index}
+              onPress={() => navigation.navigate('RestaurantDetail', { restaurantId, initialTab: 'photos' })}
+              className="flex-1 rounded-lg overflow-hidden relative"
+            >
               <LazyImage
-                source={{ uri: displayThumbnails[0] }}
+                source={{ uri: url }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="center"
+                threshold={200}
+              />
+            </Pressable>
+          ))
+        ) : (
+          // 이미지가 3개 이상일 때: 기존처럼 3개 표시
+          displayThumbnails.slice(0, 3).map((url, index) => (
+            <Pressable
+              key={index}
+              onPress={() => navigation.navigate('RestaurantDetail', { restaurantId, initialTab: 'photos' })}
+              className="flex-1 rounded-lg overflow-hidden relative"
+            >
+              <LazyImage
+                source={{ uri: url }}
                 style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
                 threshold={200}
               />
-            </View>
-          ) : displayThumbnails.length === 2 ? (
-            // 이미지가 2개일 때: 2개로 전체 영역 차지
-            displayThumbnails.map((url, index) => (
-              <View key={index} className="flex-1 rounded-lg overflow-hidden relative">
-                <LazyImage
-                  source={{ uri: url }}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="cover"
-                  threshold={200}
-                />
-              </View>
-            ))
-          ) : (
-            // 이미지가 3개 이상일 때: 기존처럼 3개 표시
-            displayThumbnails.slice(0, 3).map((url, index) => (
-              <View key={index} className="flex-1 rounded-lg overflow-hidden relative">
-                <LazyImage
-                  source={{ uri: url }}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="cover"
-                  threshold={200}
-                />
-                {/* 마지막 썸네일이고 더 많은 사진이 있을 때 "더보기" 오버레이 */}
-                {index === 2 && hasMoreImages && (
-                  <View className="absolute inset-0 bg-black/40 items-center justify-center">
-                    <Text className="text-white font-bold text-sm">+{totalImageCount - 3}</Text>
-                  </View>
-                )}
-              </View>
-            ))
-          )}
-        </View>
-      </Pressable>
+              {/* 마지막 썸네일이고 더 많은 사진이 있을 때 "더보기" 오버레이 */}
+              {index === 2 && hasMoreImages && (
+                <View className="absolute inset-0 bg-black/40 items-center justify-center">
+                  <Text className="text-white font-bold text-sm">+{totalImageCount - 3}</Text>
+                </View>
+              )}
+            </Pressable>
+          ))
+        )}
+      </View>
 
       {displayComment && (
         <Pressable
