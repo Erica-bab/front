@@ -450,6 +450,8 @@ export default function FilterScreen() {
             backgroundColor: 'white',
             borderTopWidth: 1,
             borderTopColor: '#e5e7eb',
+            flexDirection: showResetButton ? 'row' : 'column',
+            gap: showResetButton ? 8 : 0,
           }
         ]}
       >
@@ -511,8 +513,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    gap: 8,
+    // flexDirection과 gap은 조건부로 설정됨
     paddingTop: 16,
     paddingBottom: 16,
     paddingHorizontal: 16,
