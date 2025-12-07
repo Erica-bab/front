@@ -21,6 +21,7 @@ export const useCreateOrUpdateRating = (restaurantId: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurants-v2'] });
     },
   });
 };

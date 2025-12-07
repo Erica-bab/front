@@ -92,6 +92,7 @@ export const useRestaurantListV2 = (params?: Omit<RestaurantListParams, 'sort'>)
       return data;
     },
     // 다른 사용자의 별점/댓글 변경사항을 반영하기 위해 5분마다 자동 새로고침
+    // 댓글순 정렬의 정확성을 위해 지속적인 새로고침 필요
     refetchInterval: 5 * 60 * 1000, // 5분 (300000ms)
   });
 };
