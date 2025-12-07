@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "icons": "node scripts/generate-icons.js",
     "fix-splash": "node scripts/fix-splash-screen.js",
-    "prebuild:ios": "expo prebuild --clean --platform ios && npm run fix-splash"
+    "prebuild:ios": "expo prebuild --clean --platform ios && npm run fix-splash",
+    "xcode_build": "npx expo prebuild --clean --platform ios && npm run fix-splash && cd ios && open app.xcworkspace "
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.7",

@@ -29,6 +29,7 @@ export default {
         NSPhotoLibraryUsageDescription: "식당 사진을 추가하기 위해 갤러리 접근 권한이 필요합니다.",
         NSCameraUsageDescription: "식당 사진을 촬영하기 위해 카메라 접근 권한이 필요합니다.",
         CFBundleDisplayName: "에푸",
+        ProductName: "에푸",
         ITSAppUsesNonExemptEncryption: false
       },
       config: {
