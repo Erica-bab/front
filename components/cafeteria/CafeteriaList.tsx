@@ -66,28 +66,7 @@ export default function CafeteriaList({
      }, 500);
    };
 
-  // 데이터가 있으면 무조건 표시 (로딩 상태 무시)
-  // 데이터가 없고 첫 로딩 중일 때만 로딩 화면 표시
-  if (!meal_data && isLoading) {
-    return (
-      <ScrollView 
-        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#3B82F6"
-            colors={['#3B82F6']}
-          />
-        }
-      >
-        <View className="flex-1 items-center justify-center py-20">
-          <Text className="text-gray-500 text-lg">불러오는 중...</Text>
-        </View>
-      </ScrollView>
-    );
-  }
-
+  // 에러 처리 (가장 우선)
   if (meal_error) {
     return (
       <ScrollView 
