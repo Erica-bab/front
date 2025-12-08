@@ -64,22 +64,17 @@ function TabNavigator() {
           tabPress: (e) => {
             try {
               // 현재 탭이 활성화되어 있으면 초기화
-              const state = navigation.getState();
-              if (!state || !state.routes || state.index === undefined) {
-                return;
-              }
-              const currentRoute = state.routes[state.index];
-              if (currentRoute && currentRoute.name === 'Restaurant' && route.name === 'Restaurant') {
-                // 기본 동작 방지
-                e.preventDefault();
-                // Restaurant 화면에 초기화 이벤트 전달
+              // route.name으로 직접 확인 (더 안전)
+              if (route.name === 'Restaurant') {
+                // 기본 동작 방지하지 않고 이벤트만 전달
+                // 각 화면에서 useIsFocused로 확인하여 처리
                 setTimeout(() => {
                   try {
-                    (navigation as any).emit('resetToInitial');
+                    (navigation as any).emit?.('resetToInitial');
                   } catch (err) {
                     console.error('Error emitting resetToInitial:', err);
                   }
-                }, 0);
+                }, 100);
               }
             } catch (error) {
               console.error('Error in Restaurant tabPress listener:', error);
@@ -101,22 +96,17 @@ function TabNavigator() {
           tabPress: (e) => {
             try {
               // 현재 탭이 활성화되어 있으면 초기화
-              const state = navigation.getState();
-              if (!state || !state.routes || state.index === undefined) {
-                return;
-              }
-              const currentRoute = state.routes[state.index];
-              if (currentRoute && currentRoute.name === 'SchoolRestaruant' && route.name === 'SchoolRestaruant') {
-                // 기본 동작 방지
-                e.preventDefault();
-                // Cafeteria 화면에 초기화 이벤트 전달
+              // route.name으로 직접 확인 (더 안전)
+              if (route.name === 'SchoolRestaruant') {
+                // 기본 동작 방지하지 않고 이벤트만 전달
+                // 각 화면에서 useIsFocused로 확인하여 처리
                 setTimeout(() => {
                   try {
-                    (navigation as any).emit('resetToInitial');
+                    (navigation as any).emit?.('resetToInitial');
                   } catch (err) {
                     console.error('Error emitting resetToInitial:', err);
                   }
-                }, 0);
+                }, 100);
               }
             } catch (error) {
               console.error('Error in SchoolRestaruant tabPress listener:', error);
