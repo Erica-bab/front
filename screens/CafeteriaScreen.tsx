@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -168,7 +169,7 @@ export default function SchoolRestaurantScreen() {
   }, [refetch]);
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView edges={['top']} className="flex-1 bg-white">
       <CafeteriaHeader
         sortModeType={sortModeType}
         onChangeSortModeType={handleSortModeChange}
@@ -195,6 +196,6 @@ export default function SchoolRestaurantScreen() {
         onShowLogin={() => (navigation.navigate as any)('Login', { onSuccess: refreshAuthState })}
         onRefresh={handleRefresh}
       />
-    </View>
+    </SafeAreaView>
   );
 }

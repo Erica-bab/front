@@ -98,7 +98,7 @@ export default function CafeteriaHeader({
   };
 
   return (
-    <SafeAreaView className="w-full flex bg-white px-10 -mb-4">
+    <View className="w-full flex bg-white px-10 -mb-4">
       {/* sort */}
       <View className="flex-row justify-end -mr-4 mt-1">
         <ChangeSortButton
