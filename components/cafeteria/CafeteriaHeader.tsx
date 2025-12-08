@@ -72,10 +72,10 @@ export default function CafeteriaHeader({
     );
   };
   const TabClasses = {
-    baseBoxClass: '-pb-4',
+    baseBoxClass: 'pb-0',
     offTextClass: 'text-[#000000] font-medium text-xl',
     onTextClass: 'text-[#2563EB] font-medium text-xl',
-    onBoxClass: 'border-b-2 border-[#2563EB] -pb-2',
+    onBoxClass: 'border-b-2 border-[#2563EB] pb-0',
   };
 
   const handleDatePress = () => {
@@ -160,7 +160,7 @@ export default function CafeteriaHeader({
                 onPress={() => onChangeLocation(locationCode)}
                 className={`items-center ${TabClasses.baseBoxClass} ${selectedLocation === locationCode ? TabClasses.onBoxClass : ''}`}
               >
-                <View className="h-4 mb-1 justify-center">
+                <View className="h-4 justify-center">
                   <Text className={`text-xs ${selectedLocation === locationCode ? 'text-blue-400' : 'text-gray-400'}`}>
                     {menuCount}개
                   </Text>
@@ -188,7 +188,7 @@ export default function CafeteriaHeader({
                 onPress={() => onChangeTime(mealType)}
                 className={`items-center ${TabClasses.baseBoxClass} ${selectedTime === mealType ? TabClasses.onBoxClass : ''}`}
               >
-                <View className="h-4 mb-1 justify-center">
+                <View className="h-4 justify-center">
                   <Text className={`text-xs ${selectedTime === mealType ? 'text-blue-400' : 'text-gray-400'}`}>
                     {menuCount}개
                   </Text>
