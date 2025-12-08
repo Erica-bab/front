@@ -88,8 +88,32 @@ export default function CafeteriaList({
     );
   }
 
-  // 데이터가 없는 경우 (로딩 완료 후에도 데이터가 없을 때)
+  // 데이터가 없는 경우 처리
+  // 로딩 중이거나 데이터가 없을 때 표시
   if (!meal_data) {
+    return (
+      <ScrollView 
+        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing || isLoading}
+            onRefresh={handleRefresh}
+            tintColor="#3B82F6"
+            colors={['#3B82F6']}
+          />
+        }
+      >
+        <View className="flex-1 items-center justify-center py-20">
+          <Text className="text-gray-500 text-lg">
+            {isLoading ? '불러오는 중...' : '메뉴 정보가 없습니다.'}
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  // 데이터가 있지만 restaurants가 없거나 빈 배열인 경우
+  if (!meal_data.restaurants || meal_data.restaurants.length === 0) {
     return (
       <ScrollView 
         className="flex-1 px-10 py-4 bg-[#F8FAFC]"
