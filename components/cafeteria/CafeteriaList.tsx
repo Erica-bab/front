@@ -54,67 +54,112 @@ export default function CafeteriaList({
 }: CafeteriaListProps) {
    const {isAuthenticated} = useAuth();
    const [refreshing, setRefreshing] = useState(false);
-   
-   // 디버깅용 로그
-   useEffect(() => {
-     console.log('CafeteriaList - meal_data:', !!meal_data, 'isLoading:', isLoading, 'isFetching:', isFetching);
-     if (meal_data) {
-       console.log('CafeteriaList - restaurants count:', meal_data.restaurants?.length);
-     }
-   }, [meal_data, isLoading, isFetching]);
 
    const handleRefresh = async () => {
      setRefreshing(true);
      if (onRefresh) {
        await onRefresh();
      }
-     // Simulate a network request or a delay for the refresh indicator
      setTimeout(() => {
        setRefreshing(false);
      }, 500);
    };
 
-  // 에러 처리 (가장 우선)
-  if (meal_error) {
-    return (
-      <ScrollView 
-        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#3B82F6"
-            colors={['#3B82F6']}
-          />
-        }
-      >
-        <View className="flex-1 items-center justify-center py-20 px-4">
-          <Text className="text-gray-500 text-lg">에러가 발생했어요.</Text>
-          <Text className="text-gray-400 text-sm mt-2">{meal_error.message}</Text>
-        </View>
-      </ScrollView>
-    );
-  }
+  // 조건식 제거: 화면은 무조건 렌더링, 내용만 상태에 따라 처리
+  const isRefreshing = refreshing || isLoading || isFetching;
+  const hasData = meal_data && meal_data.restaurants && meal_data.restaurants.length > 0;
 
-  // 데이터가 없는 경우 처리
-  // 로딩 중이거나 데이터가 없을 때 표시
-  // isLoading 상태에 의존하지 않고 데이터 존재 여부만 확인
-  if (!meal_data) {
+  // 시간순 정렬일 때
+  if (sortModeType === 'time') {
+    const restaurant = hasData 
+      ? meal_data.restaurants.find(r => r.restaurant_code === selectedLocation)
+      : null;
+
     return (
-      <View className="flex-1 bg-[#F8FAFC]">
+      <View className="flex-1 bg-[#F8FAFC] relative">
         <ScrollView 
           className="flex-1 px-10 py-4"
           refreshControl={
             <RefreshControl
-              refreshing={refreshing || isLoading || isFetching}
+              refreshing={isRefreshing}
               onRefresh={handleRefresh}
               tintColor="#3B82F6"
               colors={['#3B82F6']}
             />
           }
         >
+          {meal_error ? (
+            <View className="flex-1 items-center justify-center py-20 px-4">
+              <Text className="text-gray-500 text-lg">에러가 발생했어요.</Text>
+              <Text className="text-gray-400 text-sm mt-2">{meal_error.message}</Text>
+            </View>
+          ) : !hasData || !restaurant ? (
+            <View className="flex-1 items-center justify-center py-20">
+              {isLoading || isFetching ? (
+                <>
+                  <ActivityIndicator size="large" color="#3B82F6" />
+                  <Text className="text-gray-500 text-lg mt-4">불러오는 중...</Text>
+                </>
+              ) : (
+                <Text className="text-gray-500 text-lg">데이터가 없습니다</Text>
+              )}
+            </View>
+          ) : (
+            MEAL_TYPES.map(mealType => {
+              const menus = getMenusByMealType(restaurant, mealType);
+              if (!menus || menus.length === 0) return null;
+
+              return (
+                <CafeteriaSection
+                  key={mealType}
+                  sortModeType="time"
+                  restaurant={restaurant}
+                  mealType={mealType}
+                  menus={menus}
+                  latitude={Number(restaurant.latitude)}
+                  longitude={Number(restaurant.longitude)}
+                  viewName={restaurant.restaurant_name}
+                  auth={!!isAuthenticated}
+                  onShowLogin={onShowLogin}
+                />
+              );
+            })
+          )}
+        </ScrollView>
+        {/* 로딩 오버레이 - 새로고침 중일 때 */}
+        {isFetching && hasData && (
+          <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/50 items-center justify-center">
+            <ActivityIndicator size="large" color="#3B82F6" />
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  // 장소순 정렬일 때
+  const targetMealType = selectedTime;
+
+  return (
+    <View className="flex-1 bg-[#F8FAFC] relative">
+      <ScrollView 
+        className="flex-1 px-10 py-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor="#3B82F6"
+            colors={['#3B82F6']}
+          />
+        }
+      >
+        {meal_error ? (
+          <View className="flex-1 items-center justify-center py-20 px-4">
+            <Text className="text-gray-500 text-lg">에러가 발생했어요.</Text>
+            <Text className="text-gray-400 text-sm mt-2">{meal_error.message}</Text>
+          </View>
+        ) : !hasData ? (
           <View className="flex-1 items-center justify-center py-20">
-            {(isLoading || isFetching) ? (
+            {isLoading || isFetching ? (
               <>
                 <ActivityIndicator size="large" color="#3B82F6" />
                 <Text className="text-gray-500 text-lg mt-4">불러오는 중...</Text>
@@ -123,129 +168,17 @@ export default function CafeteriaList({
               <Text className="text-gray-500 text-lg">메뉴 정보가 없습니다.</Text>
             )}
           </View>
-        </ScrollView>
-      </View>
-    );
-  }
-
-  // 데이터가 있지만 restaurants가 없거나 빈 배열인 경우
-  if (!meal_data.restaurants || meal_data.restaurants.length === 0) {
-    return (
-      <View className="flex-1 bg-[#F8FAFC]">
-        <ScrollView 
-          className="flex-1 px-10 py-4"
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing || isFetching}
-              onRefresh={handleRefresh}
-              tintColor="#3B82F6"
-              colors={['#3B82F6']}
-            />
-          }
-        >
-          <View className="flex-1 items-center justify-center py-20">
-            <Text className="text-gray-500 text-lg">메뉴 정보가 없습니다.</Text>
-          </View>
-        </ScrollView>
-        {/* 로딩 오버레이 - 새로고침 중일 때 */}
-        {isFetching && (
-          <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/50 items-center justify-center">
-            <ActivityIndicator size="large" color="#3B82F6" />
-          </View>
-        )}
-      </View>
-    );
-  }
-
-  // 시간순 정렬
-  if (sortModeType === 'time') {
-    const restaurant = meal_data.restaurants.find(
-      r => r.restaurant_code === selectedLocation,
-    );
-
-    if (!restaurant) {
-      return (
-        <View className="flex-1 bg-[#F8FAFC]">
-          <ScrollView 
-            className="flex-1 px-10 py-4"
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing || isFetching}
-                onRefresh={handleRefresh}
-                tintColor="#3B82F6"
-                colors={['#3B82F6']}
-              />
-            }
-          >
-            <View className="flex-1 items-center justify-center py-20">
-              <Text className="text-gray-500 text-lg">데이터가 없습니다</Text>
-            </View>
-          </ScrollView>
-          {isFetching && (
-            <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/50 items-center justify-center">
-              <ActivityIndicator size="large" color="#3B82F6" />
-            </View>
-          )}
-        </View>
-      );
-    }
-
-    const hasAnyMenu = MEAL_TYPES.some(mealType => {
-      const menus = getMenusByMealType(restaurant, mealType);
-      return menus && menus.length > 0;
-    });
-
-    if (!hasAnyMenu) {
-      return (
-        <View className="flex-1 bg-[#F8FAFC]">
-          <ScrollView 
-            className="flex-1 px-10 py-4"
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing || isFetching}
-                onRefresh={handleRefresh}
-                tintColor="#3B82F6"
-                colors={['#3B82F6']}
-              />
-            }
-          >
-            <View className="flex-1 items-center justify-center py-20">
-              <Text className="text-gray-500 text-lg">데이터가 없습니다</Text>
-            </View>
-          </ScrollView>
-          {isFetching && (
-            <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/50 items-center justify-center">
-              <ActivityIndicator size="large" color="#3B82F6" />
-            </View>
-          )}
-        </View>
-      );
-    }
-
-    // 데이터가 있으면 무조건 렌더링
-    return (
-      <View className="flex-1 bg-[#F8FAFC] relative">
-        <ScrollView 
-          className="flex-1 px-10 py-4"
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing || isFetching}
-              onRefresh={handleRefresh}
-              tintColor="#3B82F6"
-              colors={['#3B82F6']}
-            />
-          }
-        >
-          {MEAL_TYPES.map(mealType => {
-            const menus = getMenusByMealType(restaurant, mealType);
+        ) : (
+          meal_data.restaurants.map(restaurant => {
+            const menus = getMenusByMealType(restaurant, targetMealType);
             if (!menus || menus.length === 0) return null;
 
             return (
               <CafeteriaSection
-                key={mealType}
-                sortModeType="time"
+                key={restaurant.restaurant_code}
+                sortModeType="location"
                 restaurant={restaurant}
-                mealType={mealType}
+                mealType={targetMealType}
                 menus={menus}
                 latitude={Number(restaurant.latitude)}
                 longitude={Number(restaurant.longitude)}
@@ -254,81 +187,11 @@ export default function CafeteriaList({
                 onShowLogin={onShowLogin}
               />
             );
-          })}
-        </ScrollView>
-        {/* 로딩 오버레이 - 새로고침 중일 때 */}
-        {isFetching && (
-          <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/50 items-center justify-center">
-            <ActivityIndicator size="large" color="#3B82F6" />
-          </View>
+          })
         )}
-      </View>
-    );
-  }
-
-  // 장소 
-  const targetMealType = selectedTime;
-
-  const hasAnyMenu = meal_data.restaurants.some(restaurant => {
-    const menus = getMenusByMealType(restaurant, targetMealType);
-    return menus && menus.length > 0;
-  });
-
-  if (!hasAnyMenu) {
-    return (
-      <ScrollView 
-        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#3B82F6"
-            colors={['#3B82F6']}
-          />
-        }
-      >
-        <View className="flex-1 items-center justify-center py-20">
-          <Text className="text-gray-500 text-lg">데이터가 없습니다</Text>
-        </View>
       </ScrollView>
-    );
-  }
-
-  return (
-    <View className="flex-1 bg-[#F8FAFC] relative">
-      <ScrollView 
-        className="flex-1 px-10 py-4"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing || isFetching}
-            onRefresh={handleRefresh}
-            tintColor="#3B82F6"
-            colors={['#3B82F6']}
-          />
-        }
-      >
-        {meal_data.restaurants.map(restaurant => {
-          const menus = getMenusByMealType(restaurant, targetMealType);
-          if (!menus || menus.length === 0) return null;
-
-          return (
-            <CafeteriaSection
-              key={restaurant.restaurant_code}
-              sortModeType="location"
-              restaurant={restaurant}
-              mealType={targetMealType}
-              menus={menus}
-              latitude={Number(restaurant.latitude)}
-              longitude={Number(restaurant.longitude)}
-              viewName={restaurant.restaurant_name}
-              auth={!!isAuthenticated}
-              onShowLogin={onShowLogin}
-            />
-          );
-        })}
-      </ScrollView>
-      {/* 로딩 오버레이 - 데이터가 있지만 새로고침 중일 때 */}
-      {isFetching && !isLoading && (
+      {/* 로딩 오버레이 - 새로고침 중일 때 */}
+      {isFetching && hasData && (
         <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/50 items-center justify-center">
           <ActivityIndicator size="large" color="#3B82F6" />
         </View>
