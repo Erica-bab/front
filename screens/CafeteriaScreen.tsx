@@ -17,7 +17,6 @@ type SortType = 'time' | 'location';
 
 export default function SchoolRestaurantScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const queryClient = useQueryClient();
   const { refreshAuthState } = useAuth();
   const [sortModeType, setSortModeType] = useState<SortType>('time');
   const [selectedLocation, setSelectedLocation] = useState<RestaurantCode>('re12');
