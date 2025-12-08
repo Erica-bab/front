@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomSheet, { BottomSheetScrollView, useBottomSheet } from '@gorhom/bottom-sheet';
-import { useAnimatedReaction, runOnJS } from 'react-native-reanimated';
+import { useAnimatedReaction, runOnJS, useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { Dropdown } from '@/components/filter/Dropdown';
 import { OptionBtn } from '@/components/filter/OptionButton';
 import Button from '@/components/ui/Button';
@@ -20,17 +21,28 @@ const AFFILIATE =['공학대학','소프트웨어융합대학','약학대학','�
 const RESTAURANT_TYPE = ['개인식당','프랜차이즈']
 
 // 바텀시트 내부 컴포넌트 - 위치 추적용
-function BottomSheetContent({ setIsClosing }: { setIsClosing: (value: boolean) => void }) {
+function BottomSheetContent({ 
+  setIsClosing, 
+  buttonTranslateY 
+}: { 
+  setIsClosing: (value: boolean) => void;
+  buttonTranslateY: ReturnType<typeof useSharedValue<number>>;
+}) {
   const { animatedPosition } = useBottomSheet();
   const { height: screenHeight } = useWindowDimensions();
   
   useAnimatedReaction(
     () => animatedPosition.value,
     (position) => {
-      // 바텀시트가 화면의 20% 이상 내려가면 버튼 숨기기 (더 빠른 반응)
-      if (position > screenHeight * 0.2) {
+      // 바텀시트가 화면의 40% 이상 내려가면 버튼 아래로 이동
+      const threshold = screenHeight * 0.4;
+      if (position > threshold) {
+        // 버튼을 아래로 이동 (버튼 높이만큼)
+        buttonTranslateY.value = withTiming(200, { duration: 300 });
         runOnJS(setIsClosing)(true);
       } else {
+        // 버튼을 원래 위치로
+        buttonTranslateY.value = withTiming(0, { duration: 300 });
         runOnJS(setIsClosing)(false);
       }
     },
@@ -54,6 +66,7 @@ export default function FilterScreen() {
 
   const snapPoints = useMemo(() => ['85%', '95%'], []);
   const [isClosing, setIsClosing] = useState(false);
+  const buttonTranslateY = useSharedValue(0);
   const [operatingTimeMode, setOperatingTimeMode] = useState<'none' | 'operating' | 'manual'>('none');
   const [selectedDay, setSelectedDay] = useState<string>();
   const [selectedHour, setSelectedHour] = useState<string>();
@@ -431,7 +444,7 @@ export default function FilterScreen() {
       enableDynamicSizing={false}
       index={0}
     >
-      <BottomSheetContent setIsClosing={setIsClosing} />
+      <BottomSheetContent setIsClosing={setIsClosing} buttonTranslateY={buttonTranslateY} />
       <View style={styles.modalContent}>
           {/* 헤더 */}
         <View style={styles.header}>
@@ -579,15 +592,15 @@ export default function FilterScreen() {
     </BottomSheet>
     
     {/* 하단 버튼 - 화면 하단 고정 (모달과 독립적) */}
-    {!isClosing && (
-    <View 
+    <Animated.View 
       style={[
         styles.fixedButtonContainer, 
         { 
           bottom: 0,
+          transform: [{ translateY: buttonTranslateY }],
         }
       ]}
-      pointerEvents="box-none"
+      pointerEvents={isClosing ? "none" : "box-none"}
     >
       <View 
         style={[
@@ -617,8 +630,7 @@ export default function FilterScreen() {
               적용
             </Button>
           </View>
-    </View>
-    )}
+    </Animated.View>
   </>
   );
 }
