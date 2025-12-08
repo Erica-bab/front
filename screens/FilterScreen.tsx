@@ -67,6 +67,12 @@ export default function FilterScreen() {
   const snapPoints = useMemo(() => ['85%', '95%'], []);
   const [isClosing, setIsClosing] = useState(false);
   const buttonTranslateY = useSharedValue(0);
+  
+  const buttonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: buttonTranslateY.value }],
+    };
+  });
   const [operatingTimeMode, setOperatingTimeMode] = useState<'none' | 'operating' | 'manual'>('none');
   const [selectedDay, setSelectedDay] = useState<string>();
   const [selectedHour, setSelectedHour] = useState<string>();
@@ -597,8 +603,8 @@ export default function FilterScreen() {
         styles.fixedButtonContainer, 
         { 
           bottom: 0,
-          transform: [{ translateY: buttonTranslateY }],
-        }
+        },
+        buttonAnimatedStyle,
       ]}
       pointerEvents={isClosing ? "none" : "box-none"}
     >
