@@ -68,7 +68,9 @@ export default function CafeteriaList({
   // 화면은 무조건 렌더링, 내용만 상태에 따라 처리
   const isRefreshing = refreshing || isLoading || isFetching;
   const hasData = meal_data && meal_data.restaurants && meal_data.restaurants.length > 0;
-  const showLoading = isLoading || isFetching || !meal_data;
+  // 로딩 상태: 초기 로딩이거나 데이터가 없을 때만 로딩 표시
+  // isFetching만으로는 로딩 표시하지 않음 (백그라운드 새로고침은 오버레이로 처리)
+  const showLoading = isLoading || (!meal_data && !meal_error);
 
   // 시간순 정렬일 때
   if (sortModeType === 'time') {

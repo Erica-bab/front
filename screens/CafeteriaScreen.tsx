@@ -133,15 +133,12 @@ export default function SchoolRestaurantScreen() {
   };
   const { data, isLoading, isFetching, error, refetch } = useCafeteria(cafeteriaParams);
 
-  // 화면 포커스 시 확실한 새로고침 보장
-  // 빠른 탭 전환 시에도 안정적으로 작동하도록 queryClient 사용
+  // 화면 포커스 시 새로고침 (invalidateQueries 제거하여 안정성 향상)
   useFocusEffect(
     useCallback(() => {
-      // 쿼리 무효화 후 새로고침
-      // 빠른 탭 전환 시에도 안정적으로 작동
-      queryClient.invalidateQueries({ queryKey: ['cafeteriaMenu'] });
+      // invalidateQueries를 제거하고 refetch만 호출하여 빠른 전환 시에도 안정적으로 작동
       refetch();
-    }, [refetch, queryClient])
+    }, [refetch])
   );
 
   // 오늘 날짜로 이동
