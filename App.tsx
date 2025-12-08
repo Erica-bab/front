@@ -62,12 +62,27 @@ function TabNavigator() {
         }}
         listeners={({ navigation, route }) => ({
           tabPress: (e) => {
-            // 현재 탭이 활성화되어 있으면 초기화
-            const state = navigation.getState();
-            const currentRoute = state.routes[state.index];
-            if (currentRoute.name === 'Restaurant' && route.name === 'Restaurant') {
-              // Restaurant 화면에 초기화 이벤트 전달
-              navigation.emit('resetToInitial');
+            try {
+              // 현재 탭이 활성화되어 있으면 초기화
+              const state = navigation.getState();
+              if (!state || !state.routes || state.index === undefined) {
+                return;
+              }
+              const currentRoute = state.routes[state.index];
+              if (currentRoute && currentRoute.name === 'Restaurant' && route.name === 'Restaurant') {
+                // 기본 동작 방지
+                e.preventDefault();
+                // Restaurant 화면에 초기화 이벤트 전달
+                setTimeout(() => {
+                  try {
+                    (navigation as any).emit('resetToInitial');
+                  } catch (err) {
+                    console.error('Error emitting resetToInitial:', err);
+                  }
+                }, 0);
+              }
+            } catch (error) {
+              console.error('Error in Restaurant tabPress listener:', error);
             }
           },
         })}
@@ -84,12 +99,27 @@ function TabNavigator() {
         }}
         listeners={({ navigation, route }) => ({
           tabPress: (e) => {
-            // 현재 탭이 활성화되어 있으면 초기화
-            const state = navigation.getState();
-            const currentRoute = state.routes[state.index];
-            if (currentRoute.name === 'SchoolRestaruant' && route.name === 'SchoolRestaruant') {
-              // Cafeteria 화면에 초기화 이벤트 전달
-              navigation.emit('resetToInitial');
+            try {
+              // 현재 탭이 활성화되어 있으면 초기화
+              const state = navigation.getState();
+              if (!state || !state.routes || state.index === undefined) {
+                return;
+              }
+              const currentRoute = state.routes[state.index];
+              if (currentRoute && currentRoute.name === 'SchoolRestaruant' && route.name === 'SchoolRestaruant') {
+                // 기본 동작 방지
+                e.preventDefault();
+                // Cafeteria 화면에 초기화 이벤트 전달
+                setTimeout(() => {
+                  try {
+                    (navigation as any).emit('resetToInitial');
+                  } catch (err) {
+                    console.error('Error emitting resetToInitial:', err);
+                  }
+                }, 0);
+              }
+            } catch (error) {
+              console.error('Error in SchoolRestaruant tabPress listener:', error);
             }
           },
         })}
