@@ -139,7 +139,7 @@ export default function CafeteriaHeader({
       {/* tab */}
       {sortModeType === 'time' ? (
         // location tab (시간 기준 정렬일 때 식당 탭)
-        <View className="w-full flex-row justify-around">
+        <View className="w-full flex-row justify-around min-h-[60px]">
           {(['re12', 're11', 're15', 're13'] as RestaurantCode[]).map((locationCode) => {
             const locationNames = {
               're12': '학생',
@@ -160,7 +160,7 @@ export default function CafeteriaHeader({
                 onPress={() => onChangeLocation(locationCode)}
                 className={`items-center ${TabClasses.baseBoxClass} ${selectedLocation === locationCode ? TabClasses.onBoxClass : ''}`}
               >
-                <View className="h-4 mb-1 justify-center">
+                <View className="h-5 mb-1 justify-center min-h-[20px]">
                   <Text className={`text-xs ${selectedLocation === locationCode ? 'text-blue-400' : 'text-gray-400'}`}>
                     {menuCount}개
                   </Text>
@@ -174,7 +174,7 @@ export default function CafeteriaHeader({
         </View>
       ) : (
         // time tab (식당 기준 정렬일 때 시간대 탭)
-        <View className="w-full flex-row justify-around">
+        <View className="w-full flex-row justify-around min-h-[60px]">
           {(['조식', '중식', '석식'] as MealType[]).map((mealType) => {
             // 모든 식당의 해당 시간대 메뉴 개수 계산
             const menuCount = meal_data?.restaurants.reduce((total, restaurant) => {
@@ -188,7 +188,7 @@ export default function CafeteriaHeader({
                 onPress={() => onChangeTime(mealType)}
                 className={`items-center ${TabClasses.baseBoxClass} ${selectedTime === mealType ? TabClasses.onBoxClass : ''}`}
               >
-                <View className="h-4 mb-1 justify-center">
+                <View className="h-5 mb-1 justify-center min-h-[20px]">
                   <Text className={`text-xs ${selectedTime === mealType ? 'text-blue-400' : 'text-gray-400'}`}>
                     {menuCount}개
                   </Text>
