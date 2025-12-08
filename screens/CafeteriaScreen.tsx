@@ -136,22 +136,11 @@ export default function SchoolRestaurantScreen() {
   // 화면이 포커스될 때마다 새로고침 (다른 탭에서 돌아올 때)
   useFocusEffect(
     useCallback(() => {
-      // 화면 포커스 시 쿼리 무효화 및 새로고침
-      // queryClient.refetchQueries와 refetch()를 모두 사용하여 확실한 새로고침 보장
-      // async/await로 순서를 보장하여 간헐적 문제 해결
-      const refreshData = async () => {
-        // 먼저 쿼리 무효화
-        await queryClient.invalidateQueries({ queryKey: ['cafeteriaMenu'] });
-        // 그 다음 명시적으로 쿼리 새로고침 (전체)
-        await queryClient.refetchQueries({ 
-          queryKey: ['cafeteriaMenu'],
-          exact: false // 모든 cafeteriaMenu 쿼리 새로고침
-        });
-        // 현재 쿼리 인스턴스도 새로고침 (이중 보장)
-        await refetch();
-      };
-      refreshData();
-    }, [queryClient, refetch])
+      // 화면 포커스 시 쿼리 새로고침
+      // refetchOnMount: 'always'가 이미 설정되어 있으므로 단순히 refetch만 호출
+      // 중복 호출을 피하여 상태 충돌 방지
+      refetch();
+    }, [refetch])
   );
 
   // 오늘 날짜로 이동

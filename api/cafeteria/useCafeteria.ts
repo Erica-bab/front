@@ -40,7 +40,7 @@ export const useCafeteria = (params: CafeteriaParams) => {
       return data;
     },
     enabled: true, // 항상 쿼리 실행 보장
-    refetchOnMount: true, // 마운트 시 항상 새로고침
+    refetchOnMount: 'always', // 마운트 시 항상 새로고침 (캐시 무시)
     refetchInterval: 5 * 60 * 1000, // 5분마다 자동 새로고침
   });
 };
