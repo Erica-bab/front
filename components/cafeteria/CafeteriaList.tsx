@@ -90,6 +90,7 @@ export default function CafeteriaList({
 
   // 데이터가 없는 경우 처리
   // 로딩 중이거나 데이터가 없을 때 표시
+  // isLoading 상태에 의존하지 않고 데이터 존재 여부만 확인
   if (!meal_data) {
     return (
       <View className="flex-1 bg-[#F8FAFC]">
@@ -97,7 +98,7 @@ export default function CafeteriaList({
           className="flex-1 px-10 py-4"
           refreshControl={
             <RefreshControl
-              refreshing={refreshing || isLoading}
+              refreshing={refreshing || isLoading || isFetching}
               onRefresh={handleRefresh}
               tintColor="#3B82F6"
               colors={['#3B82F6']}
@@ -105,7 +106,7 @@ export default function CafeteriaList({
           }
         >
           <View className="flex-1 items-center justify-center py-20">
-            {isLoading ? (
+            {(isLoading || isFetching) ? (
               <>
                 <ActivityIndicator size="large" color="#3B82F6" />
                 <Text className="text-gray-500 text-lg mt-4">불러오는 중...</Text>
@@ -122,21 +123,29 @@ export default function CafeteriaList({
   // 데이터가 있지만 restaurants가 없거나 빈 배열인 경우
   if (!meal_data.restaurants || meal_data.restaurants.length === 0) {
     return (
-      <ScrollView 
-        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor="#3B82F6"
-            colors={['#3B82F6']}
-          />
-        }
-      >
-        <View className="flex-1 items-center justify-center py-20">
-          <Text className="text-gray-500 text-lg">메뉴 정보가 없습니다.</Text>
-        </View>
-      </ScrollView>
+      <View className="flex-1 bg-[#F8FAFC]">
+        <ScrollView 
+          className="flex-1 px-10 py-4"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing || isFetching}
+              onRefresh={handleRefresh}
+              tintColor="#3B82F6"
+              colors={['#3B82F6']}
+            />
+          }
+        >
+          <View className="flex-1 items-center justify-center py-20">
+            <Text className="text-gray-500 text-lg">메뉴 정보가 없습니다.</Text>
+          </View>
+        </ScrollView>
+        {/* 로딩 오버레이 - 새로고침 중일 때 */}
+        {isFetching && (
+          <View className="absolute top-0 left-0 right-0 bottom-0 bg-white/50 items-center justify-center">
+            <ActivityIndicator size="large" color="#3B82F6" />
+          </View>
+        )}
+      </View>
     );
   }
 
