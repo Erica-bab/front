@@ -137,10 +137,21 @@ export default function SchoolRestaurantScreen() {
   useFocusEffect(
     useCallback(() => {
       // 화면 포커스 시 쿼리 무효화 및 새로고침
-      // queryClient.invalidateQueries로 쿼리를 명시적으로 무효화하여 확실히 새로고침
-      queryClient.invalidateQueries({ queryKey: ['cafeteriaMenu'] });
-      refetch();
-    }, [refetch, queryClient])
+      // queryClient.refetchQueries와 refetch()를 모두 사용하여 확실한 새로고침 보장
+      // async/await로 순서를 보장하여 간헐적 문제 해결
+      const refreshData = async () => {
+        // 먼저 쿼리 무효화
+        await queryClient.invalidateQueries({ queryKey: ['cafeteriaMenu'] });
+        // 그 다음 명시적으로 쿼리 새로고침 (전체)
+        await queryClient.refetchQueries({ 
+          queryKey: ['cafeteriaMenu'],
+          exact: false // 모든 cafeteriaMenu 쿼리 새로고침
+        });
+        // 현재 쿼리 인스턴스도 새로고침 (이중 보장)
+        await refetch();
+      };
+      refreshData();
+    }, [queryClient, refetch])
   );
 
   // 오늘 날짜로 이동
