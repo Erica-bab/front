@@ -64,28 +64,66 @@ export default function CafeteriaList({
      }, 500);
    };
 
+  // 로딩 중이거나 데이터가 없는 경우 처리
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#F8FAFC]">
-        <Text>불러오는 중...</Text>
-      </View>
+      <ScrollView 
+        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#3B82F6"
+            colors={['#3B82F6']}
+          />
+        }
+      >
+        <View className="flex-1 items-center justify-center py-20">
+          <Text className="text-gray-500 text-lg">불러오는 중...</Text>
+        </View>
+      </ScrollView>
     );
   }
 
   if (meal_error) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#F8FAFC] px-4">
-        <Text>에러가 발생했어요.</Text>
-        <Text>{meal_error.message}</Text>
-      </View>
+      <ScrollView 
+        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#3B82F6"
+            colors={['#3B82F6']}
+          />
+        }
+      >
+        <View className="flex-1 items-center justify-center py-20 px-4">
+          <Text className="text-gray-500 text-lg">에러가 발생했어요.</Text>
+          <Text className="text-gray-400 text-sm mt-2">{meal_error.message}</Text>
+        </View>
+      </ScrollView>
     );
   }
 
+  // 데이터가 없는 경우 (로딩 완료 후에도 데이터가 없을 때)
   if (!meal_data) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#F8FAFC]">
-        <Text>메뉴 정보가 없습니다.</Text>
-      </View>
+      <ScrollView 
+        className="flex-1 px-10 py-4 bg-[#F8FAFC]"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#3B82F6"
+            colors={['#3B82F6']}
+          />
+        }
+      >
+        <View className="flex-1 items-center justify-center py-20">
+          <Text className="text-gray-500 text-lg">메뉴 정보가 없습니다.</Text>
+        </View>
+      </ScrollView>
     );
   }
 

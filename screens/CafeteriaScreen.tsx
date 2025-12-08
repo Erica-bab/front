@@ -135,6 +135,7 @@ export default function SchoolRestaurantScreen() {
   useFocusEffect(
     useCallback(() => {
       // 화면 포커스 시 데이터 새로고침
+      // refetch는 안정적인 함수이므로 의존성 배열에 포함
       refetch();
     }, [refetch])
   );
