@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CafeteriaList from '@/components/cafeteria/CafeteriaList';
 import CafeteriaHeader from '@/components/cafeteria/CafeteriaHeader';
@@ -17,6 +18,7 @@ type SortType = 'time' | 'location';
 
 export default function SchoolRestaurantScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const queryClient = useQueryClient();
   const { refreshAuthState } = useAuth();
   const [sortModeType, setSortModeType] = useState<SortType>('time');
   const [selectedLocation, setSelectedLocation] = useState<RestaurantCode>('re12');
@@ -132,13 +134,14 @@ export default function SchoolRestaurantScreen() {
   const { data, isLoading, isFetching, error, refetch } = useCafeteria(cafeteriaParams);
 
   // 화면 포커스 시 확실한 새로고침 보장
-  // 탭 전환 시 간헐적으로 데이터가 안 보이는 문제 해결
+  // 빠른 탭 전환 시에도 안정적으로 작동하도록 queryClient 사용
   useFocusEffect(
     useCallback(() => {
-      // 화면이 포커스될 때마다 쿼리 새로고침
-      // React Query가 자체적으로 중복 요청을 방지하므로 조건 없이 호출
+      // 쿼리 무효화 후 새로고침
+      // 빠른 탭 전환 시에도 안정적으로 작동
+      queryClient.invalidateQueries({ queryKey: ['cafeteriaMenu'] });
       refetch();
-    }, [refetch])
+    }, [refetch, queryClient])
   );
 
   // 오늘 날짜로 이동
