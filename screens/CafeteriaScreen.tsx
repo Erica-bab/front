@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useQueryClient } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CafeteriaList from '@/components/cafeteria/CafeteriaList';
 import CafeteriaHeader from '@/components/cafeteria/CafeteriaHeader';
@@ -18,7 +17,6 @@ type SortType = 'time' | 'location';
 
 export default function SchoolRestaurantScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const queryClient = useQueryClient();
   const { refreshAuthState } = useAuth();
   const [sortModeType, setSortModeType] = useState<SortType>('time');
   const [selectedLocation, setSelectedLocation] = useState<RestaurantCode>('re12');
