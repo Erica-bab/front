@@ -1,9 +1,10 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Modal, Alert, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView, useBottomSheet } from '@gorhom/bottom-sheet';
+import { useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { Dropdown } from '@/components/filter/Dropdown';
 import { OptionBtn } from '@/components/filter/OptionButton';
 import Button from '@/components/ui/Button';
@@ -17,6 +18,27 @@ const HOUR = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
 const MIN = ['00','30'];
 const AFFILIATE =['공학대학','소프트웨어융합대학','약학대학','첨단융합대학','글로벌문화통상대학','커뮤니케이션&컬쳐대학','경상대학','디자인대학','예체능대학','LIONS칼리지'];
 const RESTAURANT_TYPE = ['개인식당','프랜차이즈']
+
+// 바텀시트 내부 컴포넌트 - 위치 추적용
+function BottomSheetContent({ setIsClosing }: { setIsClosing: (value: boolean) => void }) {
+  const { animatedPosition } = useBottomSheet();
+  const { height: screenHeight } = useWindowDimensions();
+  
+  useAnimatedReaction(
+    () => animatedPosition.value,
+    (position) => {
+      // 바텀시트가 화면의 20% 이상 내려가면 버튼 숨기기 (더 빠른 반응)
+      if (position > screenHeight * 0.2) {
+        runOnJS(setIsClosing)(true);
+      } else {
+        runOnJS(setIsClosing)(false);
+      }
+    },
+    [screenHeight]
+  );
+  
+  return null;
+}
 
 export default function FilterScreen() {
   const navigation = useNavigation<any>();
@@ -395,10 +417,13 @@ export default function FilterScreen() {
       snapPoints={snapPoints}
       enablePanDownToClose={true}
       onClose={goBack}
-      onChange={(index) => {
-        // 바텀시트가 닫히기 시작하면 (index가 -1이 되면) 버튼 숨기기
-        if (index === -1) {
+      onAnimate={(fromIndex, toIndex) => {
+        // 바텀시트가 닫히기 시작하면 (toIndex가 -1이 되면) 버튼 즉시 숨기기
+        if (toIndex === -1) {
           setIsClosing(true);
+        } else if (toIndex >= 0) {
+          // 다시 열리면 버튼 표시
+          setIsClosing(false);
         }
       }}
       backgroundStyle={styles.container}
@@ -406,6 +431,7 @@ export default function FilterScreen() {
       enableDynamicSizing={false}
       index={0}
     >
+      <BottomSheetContent setIsClosing={setIsClosing} />
       <View style={styles.modalContent}>
           {/* 헤더 */}
         <View style={styles.header}>
