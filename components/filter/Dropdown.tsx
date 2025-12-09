@@ -16,13 +16,7 @@ export function Dropdown({ label, options, selectedValue, onSelect, placeholder 
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
 
   const handleToggle = () => {
-    // 이미 값이 선택되어 있으면 선택 해제
-    if (selectedValue) {
-      onSelect(undefined as any);
-      return;
-    }
-
-    // 값이 없으면 드롭다운 토글
+    // 드롭다운 토글
     if (onToggle) {
       onToggle();
     } else {
@@ -61,8 +55,7 @@ export function Dropdown({ label, options, selectedValue, onSelect, placeholder 
               <Pressable
                 key={option}
                 onPress={() => {
-                  // 이미 선택된 항목을 클릭하면 선택 해제
-                  onSelect(selectedValue === option ? undefined as any : option);
+                  onSelect(option);
                   if (onToggle) {
                     onToggle();
                   } else {
@@ -76,6 +69,22 @@ export function Dropdown({ label, options, selectedValue, onSelect, placeholder 
                 </Text>
               </Pressable>
             ))}
+            {/* 초기화 버튼 */}
+            {selectedValue && (
+              <Pressable
+                onPress={() => {
+                  onSelect(undefined as any);
+                  if (onToggle) {
+                    onToggle();
+                  } else {
+                    setInternalIsOpen(false);
+                  }
+                }}
+                className="px-4 py-3 border-t border-gray-200 bg-gray-50"
+              >
+                <Text className="text-base text-red-500 font-medium">초기화</Text>
+              </Pressable>
+            )}
           </ScrollView>
         </View>
       )}
