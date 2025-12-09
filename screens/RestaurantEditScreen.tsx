@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, Alert, ActivityIndicator, Switch, Modal } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput, Alert, ActivityIndicator, Switch, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,8 +16,25 @@ type EditTabType = 'phone' | 'hours' | 'menu' | 'affiliation';
 const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
 const DAY_NUMBERS = ['1', '2', '3', '4', '5', '6', '7'];
 
+// 시간/분 옵션
+const HOUR = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+const MIN = ['00', '10', '20', '30', '40', '50'];
+
 // 단과대 목록
 const COLLEGES = ['공학대학', '소프트웨어융합대학', '약학대학', '첨단융합대학', '글로벌문화통상대학', '커뮤니케이션&컬쳐대학', '경상대학', '디자인대학', '예체능대학', 'LIONS칼리지'];
+
+// 시간 파싱/포맷팅 헬퍼 함수
+const parseTime = (time: string | null): { hour: string; min: string } | null => {
+  if (!time) return null;
+  const parts = time.split(':');
+  if (parts.length !== 2) return null;
+  return { hour: parts[0].padStart(2, '0'), min: parts[1].padStart(2, '0') };
+};
+
+const formatTime = (hour: string | null, min: string | null): string | null => {
+  if (!hour || !min) return null;
+  return `${hour.padStart(2, '0')}:${min.padStart(2, '0')}`;
+};
 
 export default function RestaurantEditScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -52,6 +69,9 @@ export default function RestaurantEditScreen() {
   const [selectedCollege, setSelectedCollege] = useState<string>('');
   const [affiliationDescription, setAffiliationDescription] = useState<string>('');
   const [activeDropdown, setActiveDropdown] = useState<'college' | null>(null);
+  
+  // 시간 선택 드롭다운 상태 (형식: 'day_field_type' 예: '월_open_hour', '월_open_min')
+  const [timeDropdown, setTimeDropdown] = useState<string | null>(null);
   
   // 초기 데이터 로드
   useEffect(() => {
@@ -360,6 +380,15 @@ export default function RestaurantEditScreen() {
     }));
   };
   
+  // 시간/분 선택 핸들러
+  const updateTimeField = (day: string, field: 'open_time' | 'close_time' | 'break_start' | 'break_end' | 'last_order', hour: string | null, min: string | null) => {
+    const timeValue = formatTime(hour, min);
+    updateHour(day, field, timeValue);
+  };
+  
+  // 드롭다운 키 생성
+  const getDropdownKey = (day: string, field: string, type: 'hour' | 'min') => `${day}_${field}_${type}`;
+  
   if (isLoading || !restaurant) {
     return (
       <SafeAreaView className="flex-1 bg-white justify-center items-center">
@@ -425,7 +454,12 @@ export default function RestaurantEditScreen() {
         </Pressable>
       </View>
       
-      <ScrollView className="flex-1">
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+        keyboardVerticalOffset={100}
+      >
+        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }}>
         {/* 전화번호 수정 */}
         {selectedTab === 'phone' && (
           <View className="p-4">
@@ -472,61 +506,187 @@ export default function RestaurantEditScreen() {
                   
                   {!dayData.is_closed && (
                     <View>
-                      <View className="flex-row mb-2">
-                        <View className="flex-1 mr-2">
-                          <Text className="text-sm text-gray-600 mb-1">오픈</Text>
-                          <TextInput
-                            className="border border-gray-300 rounded-lg p-2"
-                            value={dayData.open_time || ''}
-                            onChangeText={(value) => updateHour(day, 'open_time', value)}
-                            placeholder="09:00"
-                            editable={!isPending}
+                      {/* 오픈/마감 시간 */}
+                      <View className="mb-4">
+                        <Text className="text-sm text-gray-600 mb-2">오픈</Text>
+                        <View className="flex-row gap-2 mb-3">
+                          <View className="flex-1">
+                            <Dropdown
+                              label="시간"
+                              options={HOUR}
+                              selectedValue={parseTime(dayData.open_time)?.hour ? parseTime(dayData.open_time)!.hour + '시' : undefined}
+                              onSelect={(value) => {
+                                const hour = value.replace('시', '');
+                                const currentMin = parseTime(dayData.open_time)?.min || '00';
+                                updateTimeField(day, 'open_time', hour, currentMin);
+                              }}
+                              placeholder="시간"
+                              isOpen={timeDropdown === getDropdownKey(day, 'open', 'hour')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'open', 'hour') ? null : getDropdownKey(day, 'open', 'hour'))}
                           />
                         </View>
                         <View className="flex-1">
-                          <Text className="text-sm text-gray-600 mb-1">마감</Text>
-                          <TextInput
-                            className="border border-gray-300 rounded-lg p-2"
-                            value={dayData.close_time || ''}
-                            onChangeText={(value) => updateHour(day, 'close_time', value)}
-                            placeholder="22:00"
-                            editable={!isPending}
-                          />
+                            <Dropdown
+                              label="분"
+                              options={MIN}
+                              selectedValue={parseTime(dayData.open_time)?.min ? parseTime(dayData.open_time)!.min + '분' : undefined}
+                              onSelect={(value) => {
+                                const min = value.replace('분', '');
+                                const currentHour = parseTime(dayData.open_time)?.hour || '00';
+                                updateTimeField(day, 'open_time', currentHour, min);
+                              }}
+                              placeholder="분"
+                              isOpen={timeDropdown === getDropdownKey(day, 'open', 'min')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'open', 'min') ? null : getDropdownKey(day, 'open', 'min'))}
+                            />
+                          </View>
                         </View>
                       </View>
                       
-                      <View className="flex-row mb-2">
-                        <View className="flex-1 mr-2">
-                          <Text className="text-sm text-gray-600 mb-1">브레이크 시작</Text>
-                          <TextInput
-                            className="border border-gray-300 rounded-lg p-2"
-                            value={dayData.break_start || ''}
-                            onChangeText={(value) => updateHour(day, 'break_start', value)}
-                            placeholder="14:00"
-                            editable={!isPending}
+                      <View className="mb-4">
+                        <Text className="text-sm text-gray-600 mb-2">마감</Text>
+                        <View className="flex-row gap-2 mb-3">
+                          <View className="flex-1">
+                            <Dropdown
+                              label="시간"
+                              options={HOUR}
+                              selectedValue={parseTime(dayData.close_time)?.hour ? parseTime(dayData.close_time)!.hour + '시' : undefined}
+                              onSelect={(value) => {
+                                const hour = value.replace('시', '');
+                                const currentMin = parseTime(dayData.close_time)?.min || '00';
+                                updateTimeField(day, 'close_time', hour, currentMin);
+                              }}
+                              placeholder="시간"
+                              isOpen={timeDropdown === getDropdownKey(day, 'close', 'hour')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'close', 'hour') ? null : getDropdownKey(day, 'close', 'hour'))}
                           />
                         </View>
                         <View className="flex-1">
-                          <Text className="text-sm text-gray-600 mb-1">브레이크 종료</Text>
-                          <TextInput
-                            className="border border-gray-300 rounded-lg p-2"
-                            value={dayData.break_end || ''}
-                            onChangeText={(value) => updateHour(day, 'break_end', value)}
-                            placeholder="15:00"
-                            editable={!isPending}
-                          />
+                            <Dropdown
+                              label="분"
+                              options={MIN}
+                              selectedValue={parseTime(dayData.close_time)?.min ? parseTime(dayData.close_time)!.min + '분' : undefined}
+                              onSelect={(value) => {
+                                const min = value.replace('분', '');
+                                const currentHour = parseTime(dayData.close_time)?.hour || '00';
+                                updateTimeField(day, 'close_time', currentHour, min);
+                              }}
+                              placeholder="분"
+                              isOpen={timeDropdown === getDropdownKey(day, 'close', 'min')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'close', 'min') ? null : getDropdownKey(day, 'close', 'min'))}
+                            />
+                          </View>
                         </View>
                       </View>
                       
-                      <View className="mb-2">
-                        <Text className="text-sm text-gray-600 mb-1">라스트오더</Text>
-                        <TextInput
-                          className="border border-gray-300 rounded-lg p-2"
-                          value={dayData.last_order || ''}
-                          onChangeText={(value) => updateHour(day, 'last_order', value)}
-                          placeholder="21:30"
-                          editable={!isPending}
-                        />
+                      {/* 브레이크 시작/종료 시간 */}
+                      <View className="mb-4">
+                        <Text className="text-sm text-gray-600 mb-2">브레이크 시작</Text>
+                        <View className="flex-row gap-2 mb-3">
+                          <View className="flex-1">
+                            <Dropdown
+                              label="시간"
+                              options={HOUR}
+                              selectedValue={parseTime(dayData.break_start)?.hour ? parseTime(dayData.break_start)!.hour + '시' : undefined}
+                              onSelect={(value) => {
+                                const hour = value.replace('시', '');
+                                const currentMin = parseTime(dayData.break_start)?.min || '00';
+                                updateTimeField(day, 'break_start', hour, currentMin);
+                              }}
+                              placeholder="시간"
+                              isOpen={timeDropdown === getDropdownKey(day, 'break_start', 'hour')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'break_start', 'hour') ? null : getDropdownKey(day, 'break_start', 'hour'))}
+                            />
+                          </View>
+                          <View className="flex-1">
+                            <Dropdown
+                              label="분"
+                              options={MIN}
+                              selectedValue={parseTime(dayData.break_start)?.min ? parseTime(dayData.break_start)!.min + '분' : undefined}
+                              onSelect={(value) => {
+                                const min = value.replace('분', '');
+                                const currentHour = parseTime(dayData.break_start)?.hour || '00';
+                                updateTimeField(day, 'break_start', currentHour, min);
+                              }}
+                              placeholder="분"
+                              isOpen={timeDropdown === getDropdownKey(day, 'break_start', 'min')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'break_start', 'min') ? null : getDropdownKey(day, 'break_start', 'min'))}
+                            />
+                          </View>
+                        </View>
+                      </View>
+                      
+                      <View className="mb-4">
+                        <Text className="text-sm text-gray-600 mb-2">브레이크 종료</Text>
+                        <View className="flex-row gap-2 mb-3">
+                          <View className="flex-1">
+                            <Dropdown
+                              label="시간"
+                              options={HOUR}
+                              selectedValue={parseTime(dayData.break_end)?.hour ? parseTime(dayData.break_end)!.hour + '시' : undefined}
+                              onSelect={(value) => {
+                                const hour = value.replace('시', '');
+                                const currentMin = parseTime(dayData.break_end)?.min || '00';
+                                updateTimeField(day, 'break_end', hour, currentMin);
+                              }}
+                              placeholder="시간"
+                              isOpen={timeDropdown === getDropdownKey(day, 'break_end', 'hour')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'break_end', 'hour') ? null : getDropdownKey(day, 'break_end', 'hour'))}
+                            />
+                          </View>
+                          <View className="flex-1">
+                            <Dropdown
+                              label="분"
+                              options={MIN}
+                              selectedValue={parseTime(dayData.break_end)?.min ? parseTime(dayData.break_end)!.min + '분' : undefined}
+                              onSelect={(value) => {
+                                const min = value.replace('분', '');
+                                const currentHour = parseTime(dayData.break_end)?.hour || '00';
+                                updateTimeField(day, 'break_end', currentHour, min);
+                              }}
+                              placeholder="분"
+                              isOpen={timeDropdown === getDropdownKey(day, 'break_end', 'min')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'break_end', 'min') ? null : getDropdownKey(day, 'break_end', 'min'))}
+                            />
+                          </View>
+                        </View>
+                      </View>
+                      
+                      {/* 라스트오더 */}
+                      <View className="mb-4">
+                        <Text className="text-sm text-gray-600 mb-2">라스트오더</Text>
+                        <View className="flex-row gap-2">
+                          <View className="flex-1">
+                            <Dropdown
+                              label="시간"
+                              options={HOUR}
+                              selectedValue={parseTime(dayData.last_order)?.hour ? parseTime(dayData.last_order)!.hour + '시' : undefined}
+                              onSelect={(value) => {
+                                const hour = value.replace('시', '');
+                                const currentMin = parseTime(dayData.last_order)?.min || '00';
+                                updateTimeField(day, 'last_order', hour, currentMin);
+                              }}
+                              placeholder="시간"
+                              isOpen={timeDropdown === getDropdownKey(day, 'last_order', 'hour')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'last_order', 'hour') ? null : getDropdownKey(day, 'last_order', 'hour'))}
+                            />
+                          </View>
+                          <View className="flex-1">
+                            <Dropdown
+                              label="분"
+                              options={MIN}
+                              selectedValue={parseTime(dayData.last_order)?.min ? parseTime(dayData.last_order)!.min + '분' : undefined}
+                              onSelect={(value) => {
+                                const min = value.replace('분', '');
+                                const currentHour = parseTime(dayData.last_order)?.hour || '00';
+                                updateTimeField(day, 'last_order', currentHour, min);
+                              }}
+                              placeholder="분"
+                              isOpen={timeDropdown === getDropdownKey(day, 'last_order', 'min')}
+                              onToggle={() => setTimeDropdown(timeDropdown === getDropdownKey(day, 'last_order', 'min') ? null : getDropdownKey(day, 'last_order', 'min'))}
+                            />
+                          </View>
+                        </View>
                       </View>
                     </View>
                   )}
@@ -659,6 +819,7 @@ export default function RestaurantEditScreen() {
           </View>
         )}
       </ScrollView>
+      </KeyboardAvoidingView>
       
       {/* 제휴 추가/수정 모달 */}
       <Modal
