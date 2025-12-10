@@ -102,7 +102,7 @@ export default function ReplyItem({
                     <Icon name="meatball" size={16} color="#6B7280" />
                   </Pressable>
                   
-                  {showMenu && (
+                  {(showMenu || showReportMenu) && (
                     <CommentMenu
                       isMyComment={isMyComment}
                       showReportMenu={showReportMenu}
